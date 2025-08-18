@@ -12,13 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Mark Reshetov – Backend Developer",
-  description: "Portfolio of Mark Reshetov (mnx), backend developer focused on APIs, Stripe integrations, and scalable backend systems.",
-  keywords: ["Mark Reshetov", "mnx", "backend developer", "FastAPI", "Stripe", "SQLAlchemy", "portfolio"],
-  authors: [{ name: "Mark Reshetov", url: "https://..." }],
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,9 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
