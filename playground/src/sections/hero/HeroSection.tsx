@@ -1,31 +1,111 @@
 'use client';
 import CodeTerminal from './CodeTerminal';
 
-const GithubIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+type IconProps = { className?: string };
+
+const GithubIcon = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M9 19c-5 1.5-5-2.5-7-3" />
+    <path d="M15 22v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1C19.91 1 18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77 5.44 5.44 0 0 0 3.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
   </svg>
 );
 
-const TelegramIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 3L3 10l7 2.5m11-9.5L9 16l-2 6 5-6m9-13L9 16" />
+const TelegramIcon = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M22 3 3 10l7 3 3 7 9-17z" />
+    <path d="M10 13l8-8" />
   </svg>
 );
 
-const MailIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="3" y="5" width="18" height="14" rx="2" />
-    <path d="M3 7l9 6 9-6" />
+const MailIcon = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M22 7 12 12 2 7" />
   </svg>
 );
 
-const OutlookIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M7 2v10a3 3 0 0 0 3 3h11a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2H7z"/>
-    <path d="M2 7h12v12H4a2 2 0 0 1-2-2V7z"/>
-    <circle cx="8" cy="13" r="2"/>
+const OutlookIcon = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="2.5" y="6.5" width="6.5" height="11" rx="1.5" />
+    <circle cx="5.75" cy="12" r="2.25" />
+    <rect x="9.5" y="4.5" width="12" height="15" rx="2" />
+    <path d="M9.5 8l6 4.5L21.5 8" />
   </svg>
+);
+
+const IconButton = ({
+  href,
+  label,
+  hoverColor,
+  children,
+}: {
+  href: string;
+  label: string;
+  hoverColor?: string;
+  children: React.ReactNode;
+}) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={label}
+    className={`
+      inline-flex items-center justify-center
+      h-8 w-8 md:h-9 md:w-9
+      border border-gray-800 rounded-sm
+      text-gray-600 hover:border-gray-700
+      transition-all duration-200
+      ${hoverColor || 'hover:text-white'}
+    `}
+  >
+    <span className="text-[18px] md:text-[20px] leading-none">
+      {children}
+    </span>
+  </a>
 );
 
 export default function HeroSection() {
@@ -67,18 +147,16 @@ export default function HeroSection() {
                 Backend Developer
               </p>
             </div>
-            <div className="flex gap-3 items-center">
-              {socialLinks.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`text-gray-600 transition-all duration-200 ${link.hoverColor} hover:scale-110`}
-                  aria-label={link.label}
+            <div className="flex items-center gap-2 md:gap-2.5">
+              {socialLinks.map((link, i) => (
+                <IconButton 
+                  key={i} 
+                  href={link.href} 
+                  label={link.label}
+                  hoverColor={link.hoverColor}
                 >
                   {link.icon}
-                </a>
+                </IconButton>
               ))}
             </div>
           </div>
