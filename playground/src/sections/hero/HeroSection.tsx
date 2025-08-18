@@ -47,13 +47,13 @@ export default function HeroSection() {
       <div className="flex-1 space-y-6 mb-8 lg:mb-0">
         <div className="border-b border-gray-900 pb-6 space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold">[ Mark Reshetov ]</h1>
-          <div className="space-y-3">
+          <div className="flex items-center gap-4">
             <div className="inline-block">
               <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm">
                 Backend Developer
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {socialLinks.map((link, index) => (
                 <a
                   key={index}
@@ -75,7 +75,12 @@ export default function HeroSection() {
             <span className="text-gray-600 text-xs uppercase tracking-wider">Contact</span>
             <a 
               href="mailto:mnx.private.dev@gmail.com" 
-              className="text-gray-300 hover:text-orange-500 transition-colors duration-200 w-fit"
+              className="text-gray-300 hover:text-orange-500 transition-colors duration-200 w-fit select-text cursor-text"
+              onClick={(e) => {
+                if (window.getSelection()?.toString()) {
+                  e.preventDefault();
+                }
+              }}
             >
               mnx.private.dev@gmail.com
             </a>
