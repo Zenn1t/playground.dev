@@ -41,15 +41,15 @@ const OutlookIcon = () => (
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
-    aria-hidden="true"
   >
-    <rect x="9" y="5" width="12" height="14" rx="2" />
-    <path d="M9 9l6 4 6-4" />
+    <rect x="2" y="7" width="6" height="10" rx="1.5" />
+    <circle cx="5" cy="12" r="2" />
 
-    <rect x="3" y="7" width="7" height="10" rx="1.5" />
-    <circle cx="6.5" cy="12" r="2.5" />
+    <rect x="8" y="5" width="14" height="14" rx="2" />
+    <path d="M8 9l7 5 7-5" />
   </svg>
 );
+
 
 export default function HeroSection() {
   const socialLinks = [
