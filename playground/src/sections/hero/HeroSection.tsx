@@ -57,6 +57,25 @@ const MailIcon = ({ className }: IconProps) => (
   </svg>
 );
 
+const OutlookIcon = ({ className }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="2.5" y="6.5" width="6.5" height="11" rx="1.5" />
+    <circle cx="5.75" cy="12" r="2.25" />
+    <rect x="9.5" y="4.5" width="12" height="15" rx="2" />
+    <path d="M9.5 8l6 4.5L21.5 8" />
+  </svg>
+);
 
 const IconButton = ({
   href,
@@ -98,6 +117,12 @@ export default function HeroSection() {
       hoverColor: 'hover:text-orange-500'
     },
     { 
+      icon: <OutlookIcon />, 
+      href: 'mailto:mnx.private.dev@outlook.com',
+      label: 'Outlook',
+      hoverColor: 'hover:text-[#0078D4]'
+    },
+    { 
       icon: <GithubIcon />, 
       href: 'https://github.com/Zenn1t',
       label: 'GitHub', 
@@ -114,25 +139,29 @@ export default function HeroSection() {
   return (
     <div className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm">
       <div className="flex-1 space-y-6 mb-8 lg:mb-0">
-        <div className="border-b border-gray-900 pb-6 space-y-3">
-          <h1 className="text-3xl md:text-4xl font-bold">[ Mark Reshetov ]</h1>
-          <div className="flex items-center gap-4">
-            <div className="inline-block">
-              <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm">
+        <div className="border-b border-gray-900 pb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-4">
+            <h1 className="text-3xl md:text-4xl font-bold leading-none">
+              [ Mark Reshetov ]
+            </h1>
+
+            <div className="flex items-center gap-3">
+              <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm whitespace-nowrap">
                 Backend Developer
               </p>
-            </div>
-            <div className="flex items-center gap-2 md:gap-2.5">
-              {socialLinks.map((link, i) => (
-                <IconButton 
-                  key={i} 
-                  href={link.href} 
-                  label={link.label}
-                  hoverColor={link.hoverColor}
-                >
-                  {link.icon}
-                </IconButton>
-              ))}
+
+              <div className="flex items-center gap-2 md:gap-2.5">
+                {socialLinks.map((link, i) => (
+                  <IconButton 
+                    key={i}
+                    href={link.href}
+                    label={link.label}
+                    hoverColor={link.hoverColor}
+                  >
+                    {link.icon}
+                  </IconButton>
+                ))}
+              </div>
             </div>
           </div>
         </div>
