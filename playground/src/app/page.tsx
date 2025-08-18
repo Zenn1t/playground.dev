@@ -1,12 +1,17 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 
+interface Token {
+  text: string;
+  type: string;
+}
+
 const Portfolio = () => {
-  const [displayedLines, setDisplayedLines] = useState([]);
-  const [highlightedLines, setHighlightedLines] = useState([]);
+  const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const [highlightedLines, setHighlightedLines] = useState<Token[][]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const terminalRef = useRef(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
   
   const lineHeight = 12;
   const getScrollOffset = () => {
@@ -100,13 +105,13 @@ const Portfolio = () => {
     '            )',
   ];
 
-  const getTokens = (line) => {
-    const leadingSpaces = line.match(/^(\s*)/)[1];
+  const getTokens = (line: string): Token[] => {
+    const leadingSpaces = line.match(/^(\s*)/)?.[1] || '';
     const content = line.trim();
     
     if (!content) return [{ text: leadingSpaces, type: 'text' }];
     
-    const tokens = [];
+    const tokens: Token[] = [];
     let remaining = content;
     
     const patterns = [
@@ -278,7 +283,7 @@ const Portfolio = () => {
                     return (
                       <div key={i}>
                         {isCompleted ? (
-                          isCompleted.map((token, j) => (
+                          isCompleted.map((token: Token, j: number) => (
                             <span
                               key={j}
                               style={{
