@@ -1,4 +1,5 @@
 'use client';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import CodeTerminal from './CodeTerminal';
 
 type IconProps = { className?: string };
@@ -8,13 +9,14 @@ const GithubIcon = ({ className }: IconProps) => (
     viewBox="0 0 24 24"
     width="1em"
     height="1em"
-    className={className}
+    className={`block ${className ?? ''}`}
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
+    shapeRendering="geometricPrecision"
   >
     <path d="M9 19c-5 1.5-5-2.5-7-3" />
     <path d="M15 22v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1C19.91 1 18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77 5.44 5.44 0 0 0 3.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
@@ -26,34 +28,37 @@ const TelegramIcon = ({ className }: IconProps) => (
     viewBox="0 0 24 24"
     width="1em"
     height="1em"
-    className={className}
+    className={`block ${className ?? ''}`}
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
+    shapeRendering="geometricPrecision"
   >
-    <path d="M22 3 3 10l7 3 3 7 9-17z" />
-    <path d="M10 13l8-8" />
+    <path d="M21.3 4.1L3.2 10.5c-.6.2-.6 1 .02 1.2l6.2 2.1c.3.1.5.3.6.6l2.1 6.2c.2.62 1 .62 1.2.02L21.7 4.6c.2-.56-.28-1.06-.92-.5Z" />
+    <path d="M9.8 13.3L21.3 4.1" />
   </svg>
 );
+
 
 const MailIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     width="1em"
     height="1em"
-    className={className}
+    className={`block ${className ?? ''}`}
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
+    shapeRendering="geometricPrecision"
   >
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="M22 7 12 12 2 7" />
+    <rect x="2.2" y="4.5" width="19.6" height="15" rx="2" />
+    <path d="M21.5 7.2L12 12.3 2.5 7.2" />
   </svg>
 );
 
@@ -62,20 +67,25 @@ const OutlookIcon = ({ className }: IconProps) => (
     viewBox="0 0 24 24"
     width="1em"
     height="1em"
-    className={className}
+    className={`block ${className ?? ''}`}
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
+    shapeRendering="geometricPrecision"
   >
-    <rect x="2.5" y="6.5" width="6.5" height="11" rx="1.5" />
-    <circle cx="5.75" cy="12" r="2.25" />
-    <rect x="9.5" y="4.5" width="12" height="15" rx="2" />
-    <path d="M9.5 8l6 4.5L21.5 8" />
+    <rect x="2.2" y="4.5" width="19.6" height="15" rx="2" />
+
+    <path d="M21.5 7.2L12 12.3" />
+
+    <path d="M12 4.5v15" />
+
+    <circle cx="7.1" cy="12" r="2.3" />
   </svg>
 );
+
 
 const IconButton = ({
   href,
@@ -93,108 +103,211 @@ const IconButton = ({
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className={`
-      inline-flex items-center justify-center
-      h-8 w-8 md:h-9 md:w-9
-      border border-gray-800 rounded-sm
-      text-gray-600 hover:border-gray-700
-      transition-all duration-200
-      ${hoverColor || 'hover:text-white'}
-    `}
+    className={`inline-flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 border border-gray-800 rounded-sm text-gray-600 hover:border-gray-700 transition-all duration-200 ${
+      hoverColor || 'hover:text-white'
+    } focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-700`}
   >
-    <span className="text-[18px] md:text-[20px] leading-none">
+    <span className="text-[16px] sm:text-[18px] md:text-[20px] leading-none">
       {children}
     </span>
   </a>
 );
 
+function BracketHeader({
+  width,
+  children,
+  isReady,
+}: {
+  width: number;
+  children: React.ReactNode;
+  isReady: boolean;
+}) {
+  return (
+    <div
+      className={`relative w-fit transition-opacity duration-300 ${
+        isReady ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ width: width ? `${width}px` : undefined }}
+    >
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-center select-none">
+        {children}
+      </h1>
+      <span aria-hidden className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none">
+        <span className="relative block h-[1.1em] w-0 border-l border-gray-600">
+          <span className="absolute -top-[0.28em] left-0 w-[0.5em] sm:w-[0.6em] border-t border-gray-600" />
+          <span className="absolute -bottom-[0.28em] left-0 w-[0.5em] sm:w-[0.6em] border-b border-gray-600" />
+        </span>
+      </span>
+      <span aria-hidden className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
+        <span className="relative block h-[1.1em] w-0 border-r border-gray-600">
+          <span className="absolute -top-[0.28em] right-0 w-[0.5em] sm:w-[0.6em] border-t border-gray-600" />
+          <span className="absolute -bottom-[0.28em] right-0 w-[0.5em] sm:w-[0.6em] border-b border-gray-600" />
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export default function HeroSection() {
   const socialLinks = [
-    { 
-      icon: <MailIcon />, 
+    {
+      icon: <MailIcon />,
       href: 'mailto:mnx.private.dev@gmail.com',
       label: 'Email',
-      hoverColor: 'hover:text-orange-500'
+      hoverColor: 'hover:text-orange-500',
     },
-    { 
-      icon: <OutlookIcon />, 
+    {
+      icon: <OutlookIcon />,
       href: 'mailto:mnx.private.dev@outlook.com',
       label: 'Outlook',
-      hoverColor: 'hover:text-[#0078D4]'
+      hoverColor: 'hover:text-[#0078D4]',
     },
-    { 
-      icon: <GithubIcon />, 
+    {
+      icon: <GithubIcon />,
       href: 'https://github.com/Zenn1t',
-      label: 'GitHub', 
-      hoverColor: 'hover:text-white'
+      label: 'GitHub',
+      hoverColor: 'hover:text-white',
     },
-    { 
-      icon: <TelegramIcon />, 
+    {
+      icon: <TelegramIcon />,
       href: 'https://t.me/yourchannel',
       label: 'Telegram',
-      hoverColor: 'hover:text-[#229ED9]'
+      hoverColor: 'hover:text-[#229ED9]',
     },
   ];
 
+  const devRef = useRef<HTMLParagraphElement | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const [devWidth, setDevWidth] = useState(0);
+  const [rowWidth, setRowWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+  const [useStackedLayout, setUseStackedLayout] = useState(false);
+
+  useLayoutEffect(() => {
+    const roDev = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = Math.ceil(entry.contentRect.width);
+        setDevWidth(width);
+      }
+    });
+
+    const roRow = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = Math.ceil(entry.contentRect.width);
+        setRowWidth(width);
+      }
+    });
+
+    const roContainer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = Math.ceil(entry.contentRect.width);
+        setContainerWidth(width);
+      }
+    });
+
+    if (devRef.current) roDev.observe(devRef.current);
+    if (rowRef.current) roRow.observe(rowRef.current);
+    if (containerRef.current) roContainer.observe(containerRef.current);
+
+    const timer = setTimeout(() => setIsReady(true), 100);
+
+    return () => {
+      roDev.disconnect();
+      roRow.disconnect();
+      roContainer.disconnect();
+      clearTimeout(timer);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (rowWidth && containerWidth) {
+      const shouldStack = rowWidth > containerWidth - 32; // 32px буфер
+      setUseStackedLayout(shouldStack);
+    }
+  }, [rowWidth, containerWidth]);
+
   return (
-    <div className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm">
+    <div
+      ref={containerRef}
+      className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm"
+    >
       <div className="flex-1 space-y-6 mb-8 lg:mb-0">
         <div className="border-b border-gray-900 pb-6 space-y-3">
-          <h1 className="text-3xl md:text-4xl font-bold">[ Mark Reshetov ]</h1>
-          
-          <div className="flex justify-between items-center">
-            <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm inline-block">
-              Backend Developer
-            </p>
+          <BracketHeader width={useStackedLayout ? 0 : rowWidth} isReady={isReady}>
+            Mark Reshetov
+          </BracketHeader>
 
-            <div className="flex items-center gap-2 md:gap-2.5">
-              {socialLinks.map((link, i) => (
-                <IconButton 
-                  key={i}
-                  href={link.href}
-                  label={link.label}
-                  hoverColor={link.hoverColor}
+          <div className={`transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+            {useStackedLayout ? (
+              <div className="space-y-3">
+                <p
+                  ref={devRef}
+                  className="h-8 sm:h-9 px-3 inline-flex items-center whitespace-nowrap select-none text-sm md:text-base text-gray-500 border border-gray-800 rounded-sm leading-none"
                 >
-                  {link.icon}
-                </IconButton>
-              ))}
-            </div>
+                  Backend Developer
+                </p>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {socialLinks.map((link, i) => (
+                    <IconButton key={i} href={link.href} label={link.label} hoverColor={link.hoverColor}>
+                      {link.icon}
+                    </IconButton>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div ref={rowRef} className="inline-flex items-center">
+                <p
+                  ref={devRef}
+                  className="h-8 sm:h-9 px-3 inline-flex items-center whitespace-nowrap select-none text-sm md:text-base text-gray-500 border border-gray-800 rounded-sm leading-none"
+                >
+                  Backend Developer
+                </p>
+
+                <div className="ml-2" style={devWidth ? { width: `${devWidth}px` } : undefined}>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    {socialLinks.map((link, i) => (
+                      <IconButton key={i} href={link.href} label={link.label} hoverColor={link.hoverColor}>
+                        {link.icon}
+                      </IconButton>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        
-        <div className="space-y-5">
+
+        <div className={`space-y-5 transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
           <div className="flex flex-col space-y-1">
             <span className="text-gray-600 text-xs uppercase tracking-wider">Contact</span>
-            <a 
-              href="mailto:mnx.private.dev@gmail.com" 
-              className="text-gray-300 hover:text-orange-500 transition-colors duration-200 w-fit select-text cursor-text"
+            <a
+              href="mailto:mnx.private.dev@gmail.com"
+              className="text-gray-300 hover:text-orange-500 transition-colors duration-200 w-fit select-text cursor-text break-all"
               onClick={(e) => {
-                if (window.getSelection()?.toString()) {
-                  e.preventDefault();
-                }
+                if (window.getSelection()?.toString()) e.preventDefault();
               }}
             >
               mnx.private.dev@gmail.com
             </a>
           </div>
-          
           <div className="flex flex-col space-y-1">
             <span className="text-gray-600 text-xs uppercase tracking-wider">Location</span>
             <span className="text-gray-300">Bern, Switzerland</span>
           </div>
-          
           <div className="flex flex-col space-y-1">
             <span className="text-gray-600 text-xs uppercase tracking-wider">Experience</span>
             <span className="text-gray-300">2+ years in backend</span>
           </div>
-          
           <div className="flex flex-col space-y-1">
             <span className="text-gray-600 text-xs uppercase tracking-wider">Languages</span>
             <span className="text-gray-300">DE (A2) / EN (A1) / RU / UK</span>
           </div>
         </div>
       </div>
-      
+
       <CodeTerminal />
     </div>
   );
