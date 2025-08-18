@@ -9,7 +9,7 @@ const GithubIcon = () => (
 
 const TelegramIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M21 5L2 12.5l7 2.5M21 5l-7 14-5-7M21 5L9 15m5 0l5 7" />
+    <path d="M21 3L3 11l6 2m12-10L10 16l-1 6 3-5m9-14L10 16" />
   </svg>
 );
 
@@ -17,6 +17,14 @@ const MailIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="2" y="4" width="20" height="16" rx="2" />
     <path d="M22 7l-10 5L2 7" />
+  </svg>
+);
+
+const OutlookIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <rect x="6" y="3" width="16" height="18" rx="2" />
+    <path d="M2 7h10v10H2z" />
+    <path d="M6 12h2" />
   </svg>
 );
 
@@ -29,8 +37,14 @@ export default function HeroSection() {
       hoverColor: 'hover:text-orange-500'
     },
     { 
+      icon: <OutlookIcon />, 
+      href: 'mailto:mnx.private.dev@outlook.com',
+      label: 'Outlook',
+      hoverColor: 'hover:text-[#0078D4]'
+    },
+    { 
       icon: <GithubIcon />, 
-      href: 'https://github.com/yourusername',
+      href: 'https://github.com/Zenn1t',
       label: 'GitHub', 
       hoverColor: 'hover:text-white'
     },
