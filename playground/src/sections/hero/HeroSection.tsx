@@ -57,25 +57,6 @@ const MailIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-const OutlookIcon = ({ className }: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    width="1em"
-    height="1em"
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <rect x="2.5" y="6.5" width="6.5" height="11" rx="1.5" />
-    <circle cx="5.75" cy="12" r="2.25" />
-    <rect x="9.5" y="4.5" width="12" height="15" rx="2" />
-    <path d="M9.5 8l6 4.5L21.5 8" />
-  </svg>
-);
 
 const IconButton = ({
   href,
@@ -115,12 +96,6 @@ export default function HeroSection() {
       href: 'mailto:mnx.private.dev@gmail.com',
       label: 'Email',
       hoverColor: 'hover:text-orange-500'
-    },
-    { 
-      icon: <OutlookIcon />, 
-      href: 'mailto:mnx.private.dev@outlook.com',
-      label: 'Outlook',
-      hoverColor: 'hover:text-[#0078D4]'
     },
     { 
       icon: <GithubIcon />, 
