@@ -3,7 +3,7 @@ import HeroSection from "@/sections/hero/HeroSection";
 import NextSection from "@/sections/next-section/NextSection";
 
 export const metadata: Metadata = {
-  title: "Mark Reshetov – Backend Developer",
+  title: "Mark Reshetov",
   description: "Portfolio of Mark Reshetov (mnx), backend developer focused on APIs, Stripe integrations, and scalable backend systems.",
   keywords: ["Mark Reshetov", "mnx", "backend developer", "FastAPI", "Stripe", "SQLAlchemy", "portfolio"],
   authors: [{ name: "Mark Reshetov", url: "https://..." }],
