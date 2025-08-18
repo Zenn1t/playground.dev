@@ -139,29 +139,25 @@ export default function HeroSection() {
   return (
     <div className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm">
       <div className="flex-1 space-y-6 mb-8 lg:mb-0">
-        <div className="border-b border-gray-900 pb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-4">
-            <h1 className="text-3xl md:text-4xl font-bold leading-none">
-              [ Mark Reshetov ]
-            </h1>
+        <div className="border-b border-gray-900 pb-6 space-y-3">
+          <h1 className="text-3xl md:text-4xl font-bold">[ Mark Reshetov ]</h1>
+          
+          <div className="flex justify-between items-center">
+            <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm inline-block">
+              Backend Developer
+            </p>
 
-            <div className="flex items-center gap-3">
-              <p className="text-sm md:text-base text-gray-500 border border-gray-800 px-3 py-1 rounded-sm whitespace-nowrap">
-                Backend Developer
-              </p>
-
-              <div className="flex items-center gap-2 md:gap-2.5">
-                {socialLinks.map((link, i) => (
-                  <IconButton 
-                    key={i}
-                    href={link.href}
-                    label={link.label}
-                    hoverColor={link.hoverColor}
-                  >
-                    {link.icon}
-                  </IconButton>
-                ))}
-              </div>
+            <div className="flex items-center gap-2 md:gap-2.5">
+              {socialLinks.map((link, i) => (
+                <IconButton 
+                  key={i}
+                  href={link.href}
+                  label={link.label}
+                  hoverColor={link.hoverColor}
+                >
+                  {link.icon}
+                </IconButton>
+              ))}
             </div>
           </div>
         </div>
