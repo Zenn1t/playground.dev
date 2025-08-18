@@ -1,14 +1,22 @@
 'use client';
 
-import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  animate,
+} from 'framer-motion';
+
+type LabelPos = 'top' | 'bottom';
 
 type NodeBase = {
   id: string;
   label: string;
   x: number;
   description: string;
-  labelPosition: 'top' | 'bottom';
+  labelPosition: LabelPos;
 };
 
 type MainNode = NodeBase & {
@@ -22,7 +30,7 @@ type Range = {
   label: string;
   startNode: string;
   endNode: string;
-  position: 'top' | 'bottom';
+  position: LabelPos;
   subEvents?: NodeBase[];
 };
 
@@ -30,23 +38,22 @@ type Branch = {
   id: string;
   label: string;
   startNode: string;
-  y: number; 
+  y: number;
   nodes: NodeBase[];
 };
 
 export default function ProductRoadmapFlow() {
-  const controls = useAnimation();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   const mainTimeline: MainNode[] = [
-    { id: 'idea',     label: 'Idea',     x: 100, description: 'Initial concept & vision', labelPosition: 'bottom', hasChildren: false },
-    { id: 'planning', label: 'Planning', x: 200, description: 'Architecture & strategy',  labelPosition: 'top',    hasChildren: true,  hollow: true },
-    { id: 'pre-mvp',  label: 'Pre-MVP',  x: 320, description: 'Core features definition', labelPosition: 'bottom', hasChildren: true,  hollow: true },
-    { id: 'analysis', label: 'Analysis', x: 440, description: 'Market & tech research',   labelPosition: 'top',    hasChildren: true },
-    { id: 'docs',     label: 'Docs',     x: 560, description: 'Technical documentation',  labelPosition: 'bottom', hasChildren: false },
-    { id: 'deploy',   label: 'Deploy',   x: 680, description: 'First deployment',         labelPosition: 'top',    hasChildren: true, isBranch: true },
-    { id: 'mvp',      label: 'MVP',      x: 800, description: 'Minimum viable product',   labelPosition: 'bottom', hasChildren: true },
-    { id: 'integration', label: 'Integration', x: 920, description: 'External services', labelPosition: 'top',     hasChildren: false },
+    { id: 'idea',     label: 'Idea',     x: 50,  description: 'Initial concept & vision', labelPosition: 'bottom', hasChildren: false },
+    { id: 'planning', label: 'Planning', x: 100, description: 'Architecture & strategy',  labelPosition: 'top',    hasChildren: true,  hollow: true },
+    { id: 'pre-mvp',  label: 'Pre-MVP',  x: 160, description: 'Core features definition', labelPosition: 'bottom', hasChildren: true,  hollow: true },
+    { id: 'analysis', label: 'Analysis', x: 220, description: 'Market & tech research',   labelPosition: 'top',    hasChildren: true },
+    { id: 'docs',     label: 'Docs',     x: 280, description: 'Technical documentation',  labelPosition: 'bottom', hasChildren: false },
+    { id: 'deploy',   label: 'Deploy',   x: 340, description: 'First deployment',         labelPosition: 'top',    hasChildren: true, isBranch: true },
+    { id: 'mvp',      label: 'MVP',      x: 400, description: 'Minimum viable product',   labelPosition: 'bottom', hasChildren: true },
+    { id: 'integration', label: 'Integration', x: 460, description: 'External services', labelPosition: 'top',     hasChildren: false },
   ];
 
   const rangeEvents: Range[] = [
@@ -57,9 +64,9 @@ export default function ProductRoadmapFlow() {
       endNode: 'mvp',
       position: 'top',
       subEvents: [
-        // { id: 'metrics',  label: 'Metrics',  x: 480, description: 'KPI definition',   labelPosition: 'top' },
-        { id: 'tracking', label: 'Tracking', x: 580, description: 'User behavior',    labelPosition: 'bottom' },
-        { id: 'reports',  label: 'Reports',  x: 680, description: 'Data visualization', labelPosition: 'top' }
+        { id: 'metrics',  label: 'Metrics',  x: 240, description: 'KPI definition',   labelPosition: 'top' },
+        { id: 'tracking', label: 'Tracking', x: 290, description: 'User behavior',    labelPosition: 'bottom' },
+        { id: 'reports',  label: 'Reports',  x: 340, description: 'Data visualization', labelPosition: 'top' }
       ]
     },
     {
@@ -69,9 +76,9 @@ export default function ProductRoadmapFlow() {
       endNode: 'deploy',
       position: 'bottom',
       subEvents: [
-        { id: 'unit',              label: 'Unit tests',  x: 380, description: 'Component testing', labelPosition: 'bottom' },
-        { id: 'integration-test',  label: 'Integration', x: 480, description: 'System testing',    labelPosition: 'top' },
-        { id: 'uat',               label: 'UAT',         x: 580, description: 'User acceptance',   labelPosition: 'bottom' }
+        { id: 'unit',              label: 'Unit tests',  x: 190, description: 'Component testing', labelPosition: 'bottom' },
+        { id: 'integration-test',  label: 'Integration', x: 240, description: 'System testing',    labelPosition: 'top' },
+        { id: 'uat',               label: 'UAT',         x: 290, description: 'User acceptance',   labelPosition: 'bottom' }
       ]
     },
     {
@@ -81,8 +88,8 @@ export default function ProductRoadmapFlow() {
       endNode: 'pre-mvp',
       position: 'top',
       subEvents: [
-        { id: 'ux', label: 'UX', x: 240, description: 'User experience', labelPosition: 'top' },
-        { id: 'ui', label: 'UI', x: 280, description: 'Interface design', labelPosition: 'bottom' }
+        { id: 'ux', label: 'UX', x: 120, description: 'User experience', labelPosition: 'top' },
+        { id: 'ui', label: 'UI', x: 140, description: 'Interface design', labelPosition: 'bottom' }
       ]
     }
   ];
@@ -92,35 +99,26 @@ export default function ProductRoadmapFlow() {
       id: 'devops-branch',
       label: 'DevOps',
       startNode: 'deploy',
-      y: 100,
+      y: 80,
       nodes: [
-        { id: 'ci-cd',        label: 'CI/CD',        x: 720, description: 'Automation pipeline', labelPosition: 'bottom' },
-        { id: 'monitoring',   label: 'Monitoring',   x: 840, description: 'System observability', labelPosition: 'top' },
-        { id: 'scaling',      label: 'Scaling',      x: 960, description: 'Auto-scaling setup',   labelPosition: 'bottom' },
-        { id: 'optimization', label: 'Optimization', x: 1080, description: 'Performance tuning',  labelPosition: 'top' }
+        { id: 'ci-cd',        label: 'CI/CD',        x: 360, description: 'Automation pipeline', labelPosition: 'bottom' },
+        { id: 'monitoring',   label: 'Monitoring',   x: 410, description: 'System observability', labelPosition: 'top' },
+        { id: 'scaling',      label: 'Scaling',      x: 460, description: 'Auto-scaling setup',   labelPosition: 'bottom' },
+        { id: 'optimization', label: 'Optimization', x: 510, description: 'Performance tuning',  labelPosition: 'top' }
       ]
     },
     {
       id: 'mobile-branch',
       label: 'Mobile',
       startNode: 'mvp',
-      y: -100,
+      y: -80,
       nodes: [
-        { id: 'mobile-design', label: 'Mobile Design', x: 840, description: 'Native UI/UX',     labelPosition: 'top' },
-        { id: 'ios',           label: 'iOS',           x: 960, description: 'iOS application',  labelPosition: 'bottom' },
-        { id: 'android',       label: 'Android',       x: 1080, description: 'Android application', labelPosition: 'top' }
+        { id: 'mobile-design', label: 'Mobile Design', x: 420, description: 'Native UI/UX',     labelPosition: 'top' },
+        { id: 'ios',           label: 'iOS',           x: 470, description: 'iOS application',  labelPosition: 'bottom' },
+        { id: 'android',       label: 'Android',       x: 520, description: 'Android application', labelPosition: 'top' }
       ]
     }
   ];
-
-  const allNodes = useMemo(
-    () => [
-      ...mainTimeline,
-      ...rangeEvents.flatMap(r => r.subEvents || []),
-      ...branchLines.flatMap(b => b.nodes),
-    ],
-    []
-  );
 
   const nodeMap = useMemo(() => {
     const m = new Map<string, MainNode>();
@@ -128,50 +126,129 @@ export default function ProductRoadmapFlow() {
     return m;
   }, []);
 
+  const VIEW_W = 550;
+  const VIEW_H = 350;
+  const BASE_Y = 175;
+  const START_X = 25;
+  const END_X = 525;
+  const IDEA_X = 50;
+
+  const axisX2 = useMotionValue<number>(IDEA_X);
+  const cameraFocusX = useSpring(IDEA_X, { stiffness: 60, damping: 18, mass: 0.9 });
+  const cameraScale  = useMotionValue<number>(1.8);
+
+  const [following, setFollowing] = useState(false);
   useEffect(() => {
-    controls.start('visible');
-  }, [controls]);
+    const unsub = axisX2.on('change', (v) => {
+      if (following) {
+        cameraFocusX.set(v + 30);
+      }
+    });
+    return () => unsub();
+  }, [following, cameraFocusX, axisX2]);
 
-  const VIEW_W = 1200;
-  const VIEW_H = 600;
-  const BASE_Y = 300;
+  const groupX = useTransform(cameraFocusX, (fx) => {
+    const desired = VIEW_W / 2 - fx;
+    const min = VIEW_W / 2 - END_X - 20;
+    const max = VIEW_W / 2 - START_X + 20;
+    return Math.max(min, Math.min(max, desired));
+  });
 
-  const getTrackY = (position: 'top' | 'bottom', offset = 0) =>
-    position === 'top' ? BASE_Y - 80 - offset : BASE_Y + 80 + offset;
+  const [ideaVisible, setIdeaVisible] = useState(false);
 
-  const [hover, setHover] = useState<{ id: string; label: string; desc: string; x: number; y: number } | null>(null);
+  useEffect(() => {
+    let mounted = true;
 
-  const placeOverlay = () => {
-    if (!containerRef.current || !hover) return { left: 0, top: 0 };
-    const rect = containerRef.current.getBoundingClientRect();
-    const kx = rect.width / VIEW_W;
-    const ky = rect.height / VIEW_H;
-    const pad = 12;
-    const left = Math.min(rect.width - 260, Math.max(0, hover.x * kx + pad));
-    const top  = Math.min(rect.height - 120, Math.max(0, hover.y * ky - 60));
-    return { left, top };
+    (async () => {
+      setIdeaVisible(true);
+      await new Promise(r => setTimeout(r, 500));
+
+      const LINE_DURATION = 9.0;
+      const lineControls = animate(axisX2, END_X, {
+        duration: LINE_DURATION,
+        ease: [0.2, 0.0, 0.2, 1.0],
+      });
+
+      await new Promise(r => setTimeout(r, 450));
+      if (!mounted) return;
+
+      setFollowing(true);
+      animate(cameraScale, 1.8, {
+        duration: LINE_DURATION - 0.6,
+        ease: [0.2, 0.0, 0.2, 1.0],
+      });
+
+      await lineControls.finished;
+      if (!mounted) return;
+
+      setFollowing(false);
+
+      const sceneMid = (START_X + END_X) / 2;
+      const finalCenter = sceneMid;
+      await Promise.all([
+        animate(cameraFocusX, finalCenter, {
+          duration: 0.9,
+          ease: [0.2, 0.0, 0.2, 1.0],
+        }).finished,
+        animate(cameraScale, 1.5, {
+          duration: 0.9,
+          ease: [0.2, 0.0, 0.2, 1.0],
+        }).finished,
+      ]);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [axisX2, cameraFocusX, cameraScale]);
+
+  const appearAt = (x: number, pre = 12, post = 3) =>
+    useTransform(axisX2, [x - pre, x + post], [0, 1]);
+
+  const getTrackY = (position: LabelPos, offset = 0) =>
+    position === 'top' ? BASE_Y - 50 - offset : BASE_Y + 50 + offset;
+
+  const tick = (x: number, y: number, pos: LabelPos, len = 8) => {
+    const o = appearAt(x);
+    return (
+      <motion.line
+        x1={x} y1={y} x2={x} y2={pos === 'top' ? y - len : y + len}
+        stroke="#9ca3af" strokeWidth={1}
+        style={{ opacity: o }}
+      />
+    );
   };
-
-  const drawLabelTick = (x: number, y: number, pos: 'top' | 'bottom', len = 14) => (
-    <line x1={x} y1={y} x2={x} y2={pos === 'top' ? y - len : y + len} stroke="#9ca3af" strokeWidth={1} opacity={0.6} />
-  );
 
   const drawRange = (range: Range) => {
     const s = nodeMap.get(range.startNode);
     const e = nodeMap.get(range.endNode);
     if (!s || !e) return null;
     const y = getTrackY(range.position);
+    const o = useTransform(axisX2, [s.x - 5, e.x - 3], [0, 0.6]);
 
     return (
-      <g key={`range-${range.id}`} pointerEvents="none">
+      <g key={`range-${range.id}`}>
         <motion.line
           x1={s.x} y1={y} x2={e.x} y2={y}
-          stroke="#6b7280" strokeWidth={1} opacity={0.5}
-          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.2 }}
+          stroke="#6b7280" strokeWidth={1}
+          style={{ opacity: o }}
         />
-        <line x1={s.x} y1={BASE_Y} x2={s.x} y2={y} stroke="#6b7280" strokeWidth={1} opacity={0.3} strokeDasharray="2,2" />
-        <line x1={e.x} y1={BASE_Y} x2={e.x} y2={y} stroke="#6b7280" strokeWidth={1} opacity={0.3} strokeDasharray="2,2" />
-        <text x={s.x - 30} y={y - 6} fill="#9ca3af" fontSize="11" fontWeight={600}>{range.label}</text>
+        <motion.line
+          x1={s.x} y1={BASE_Y} x2={s.x} y2={y}
+          stroke="#6b7280" strokeWidth={1} strokeDasharray="2,2"
+          style={{ opacity: o }}
+        />
+        <motion.line
+          x1={e.x} y1={BASE_Y} x2={e.x} y2={y}
+          stroke="#6b7280" strokeWidth={1} strokeDasharray="2,2"
+          style={{ opacity: o }}
+        />
+        <motion.text
+          x={s.x - 15} y={y - 5} fill="#9ca3af" fontSize="9" fontWeight={600}
+          style={{ opacity: o }}
+        >
+          {range.label}
+        </motion.text>
       </g>
     );
   };
@@ -180,152 +257,191 @@ export default function ProductRoadmapFlow() {
     const start = nodeMap.get(branch.startNode);
     if (!start) return null;
     const by = BASE_Y + branch.y;
+    const o = appearAt(start.x);
 
     return (
-      <g key={`branch-${branch.id}`} pointerEvents="none">
+      <g key={`branch-${branch.id}`}>
         <motion.path
-          d={`M ${start.x} ${BASE_Y} Q ${start.x + 20} ${BASE_Y + branch.y / 2} ${start.x + 40} ${by}`}
-          stroke="#6b7280" strokeWidth={1} fill="none" opacity={0.5}
-          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, delay: 0.5 }}
+          d={`M ${start.x} ${BASE_Y} Q ${start.x + 10} ${BASE_Y + branch.y / 2} ${start.x + 20} ${by}`}
+          stroke="#6b7280" strokeWidth={1} fill="none"
+          style={{ opacity: o }}
         />
         <motion.line
-          x1={start.x + 40} y1={by} x2={branch.nodes[branch.nodes.length - 1].x + 50} y2={by}
-          stroke="#6b7280" strokeWidth={1} opacity={0.5}
-          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.7 }}
+          x1={start.x + 20} y1={by} x2={branch.nodes[branch.nodes.length - 1].x + 25} y2={by}
+          stroke="#6b7280" strokeWidth={1}
+          style={{ opacity: o }}
         />
-        <text x={branch.nodes[0].x - 40} y={by - 10} fill="#9ca3af" fontSize="11" fontWeight={700}>{branch.label}</text>
+        <motion.text
+          x={branch.nodes[0].x - 20} y={by - 8} fill="#9ca3af" fontSize="9" fontWeight={700}
+          style={{ opacity: o }}
+        >
+          {branch.label}
+        </motion.text>
       </g>
     );
   };
 
-  const onEnter = (id: string, label: string, description: string, x: number, y: number) =>
-    setHover({ id, label, desc: description, x, y });
-
-  const onLeave = () => setHover(null);
-
   return (
-    <div ref={containerRef} className="relative w-full h-[640px] bg-black p-6 rounded-lg border border-gray-800">
-      <div className="absolute left-6 right-6 top-6 z-10 pointer-events-none">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Product Development Flow</h1>
-        <p className="text-gray-500 text-sm"></p>
+    <div className="border border-gray-900 rounded-sm p-4 md:p-6 bg-black/50 backdrop-blur-sm">
+      <div className="mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-left select-none text-white">
+          Building Products - Step by Step
+        </h1>
       </div>
 
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <motion.line
-          x1={50} y1={BASE_Y} x2={1100} y2={BASE_Y}
-          stroke="#6b7280" strokeWidth={1}
-          initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2 }}
-        />
+      <div className="relative w-full h-[350px] bg-black border border-gray-800 rounded-sm overflow-hidden">
+        <div className="relative w-full h-full">
+          <svg
+            ref={svgRef}
+            className="w-full h-full"
+            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <motion.g style={{ x: groupX, scale: cameraScale }}>
+              <motion.line
+                x1={START_X}
+                y1={BASE_Y}
+                y2={BASE_Y}
+                stroke="#6b7280"
+                strokeWidth={1}
+                x2={axisX2}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
 
-        {rangeEvents.map(drawRange)}
-        {branchLines.map(drawBranch)}
+              {rangeEvents.map(drawRange)}
+              {branchLines.map(drawBranch)}
 
-        {mainTimeline.map(n => drawLabelTick(n.x, BASE_Y, n.labelPosition))}
+              {mainTimeline.map((n) => {
+                const isKey = n.hasChildren || n.isBranch;
+                const labelDy = n.labelPosition === 'top' ? -16 : 16;
+                const o = appearAt(n.x);
 
-        {mainTimeline.map((n, idx) => {
-          const isKey = n.hasChildren || n.isBranch;
-          const labelDy = n.labelPosition === 'top' ? -24 : 24;
-
-          return (
-            <g
-              key={n.id}
-              onMouseEnter={() => onEnter(n.id, n.label, n.description, n.x, BASE_Y)}
-              onMouseLeave={onLeave}
-              style={{ cursor: 'default' }}
-            >
-              {n.hollow ? (
-                <circle cx={n.x} cy={BASE_Y} r={6} fill="transparent" stroke="#ffffff" strokeWidth={1.2} />
-              ) : isKey ? (
-                <g>
-                  <rect x={n.x - 10} y={BASE_Y - 10} width={20} height={20} fill="#111827" stroke="#4b5563" strokeWidth={1} />
-                  {n.isBranch ? (
-                    <circle cx={n.x} cy={BASE_Y} r={4} fill="transparent" stroke="#f59e0b" strokeWidth={1.2} />
-                  ) : (
-                    <circle cx={n.x} cy={BASE_Y} r={4} fill="#f59e0b" />
-                  )}
-                </g>
-              ) : (
-                <circle cx={n.x} cy={BASE_Y} r={3} fill="#9ca3af" />
-              )}
-
-              <text
-                x={n.x}
-                y={BASE_Y + labelDy}
-                textAnchor="middle"
-                fontSize="12"
-                fill="#9ca3af"
-              >
-                {n.label}
-              </text>
-            </g>
-          );
-        })}
-
-        {rangeEvents.map(range => {
-          const y = getTrackY(range.position);
-          return (
-            <g key={`sub-${range.id}`}>
-              {range.subEvents?.map(ev => {
-                const labelDy = ev.labelPosition === 'top' ? -16 : 18;
                 return (
-                  <g
-                    key={ev.id}
-                    onMouseEnter={() => onEnter(ev.id, ev.label, ev.description, ev.x, y)}
-                    onMouseLeave={onLeave}
-                    style={{ cursor: 'default' }}
-                  >
-                    {drawLabelTick(ev.x, y, ev.labelPosition, 12)}
-                    <circle cx={ev.x} cy={y} r={3} fill="#9ca3af" />
-                    <text x={ev.x} y={y + labelDy} textAnchor="middle" fontSize="11" fill="#9ca3af">{ev.label}</text>
+                  <g key={n.id}>
+                    {tick(n.x, BASE_Y, n.labelPosition, 8)}
+
+                    {n.id === 'idea' ? (
+                      <>
+                        <motion.circle
+                          cx={n.x} cy={BASE_Y} r={4}
+                          fill="#f59e0b"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: ideaVisible ? 1 : 0 }}
+                          transition={{ duration: 0.35, ease: 'easeOut' }}
+                        />
+                        <motion.text
+                          x={n.x} y={BASE_Y + labelDy}
+                          textAnchor="middle" fontSize="10" fill="#f59e0b"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: ideaVisible ? 1 : 0 }}
+                          transition={{ delay: 0.05, duration: 0.3, ease: 'easeOut' }}
+                        >
+                          {n.label}
+                        </motion.text>
+                      </>
+                    ) : (
+                      <>
+                        {n.hollow ? (
+                          <motion.circle
+                            cx={n.x} cy={BASE_Y} r={4}
+                            fill="transparent" stroke="#ffffff" strokeWidth={1}
+                            style={{ opacity: o }}
+                          />
+                        ) : isKey ? (
+                          <g>
+                            <motion.rect
+                              x={n.x - 7} y={BASE_Y - 7} width={14} height={14}
+                              fill="#111827" stroke="#4b5563" strokeWidth={1}
+                              style={{ opacity: o }}
+                            />
+                            <motion.circle
+                              cx={n.x} cy={BASE_Y} r={2.5}
+                              fill={n.isBranch ? "transparent" : "#f59e0b"}
+                              stroke={n.isBranch ? "#f59e0b" : "none"}
+                              strokeWidth={n.isBranch ? 1 : 0}
+                              style={{ opacity: o }}
+                            />
+                          </g>
+                        ) : (
+                          <motion.circle
+                            cx={n.x} cy={BASE_Y} r={2} fill="#9ca3af"
+                            style={{ opacity: o }}
+                          />
+                        )}
+
+                        <motion.text
+                          x={n.x} y={BASE_Y + labelDy}
+                          textAnchor="middle" fontSize="10" fill="#9ca3af"
+                          style={{ opacity: o }}
+                        >
+                          {n.label}
+                        </motion.text>
+                      </>
+                    )}
                   </g>
                 );
               })}
-            </g>
-          );
-        })}
 
-        {branchLines.map(branch => {
-          const by = BASE_Y + branch.y;
-          return (
-            <g key={`nodes-${branch.id}`}>
-              {branch.nodes.map(ev => {
-                const labelDy = ev.labelPosition === 'top' ? -18 : 20;
+              {rangeEvents.map(range => {
+                const y = getTrackY(range.position);
                 return (
-                  <g
-                    key={ev.id}
-                    onMouseEnter={() => onEnter(ev.id, ev.label, ev.description, ev.x, by)}
-                    onMouseLeave={onLeave}
-                    style={{ cursor: 'default' }}
-                  >
-                    {drawLabelTick(ev.x, by, ev.labelPosition, 16)}
-                    <circle cx={ev.x} cy={by} r={3} fill="#9ca3af" />
-                    <text x={ev.x} y={by + labelDy} textAnchor="middle" fontSize="11" fill="#9ca3af">{ev.label}</text>
+                  <g key={`sub-${range.id}`}>
+                    {range.subEvents?.map(ev => {
+                      const labelDy = ev.labelPosition === 'top' ? -10 : 12;
+                      const o = appearAt(ev.x);
+                      return (
+                        <g key={ev.id}>
+                          {tick(ev.x, y, ev.labelPosition, 6)}
+                          <motion.circle
+                            cx={ev.x} cy={y} r={2} fill="#9ca3af"
+                            style={{ opacity: o }}
+                          />
+                          <motion.text
+                            x={ev.x} y={y + labelDy}
+                            textAnchor="middle" fontSize="9" fill="#9ca3af"
+                            style={{ opacity: o }}
+                          >
+                            {ev.label}
+                          </motion.text>
+                        </g>
+                      );
+                    })}
                   </g>
                 );
               })}
-            </g>
-          );
-        })}
-      </svg>
 
-      {hover && (
-        <div
-          className="absolute z-20 pointer-events-none"
-          style={{ ...placeOverlay(), width: 240 }}
-        >
-          <div className="p-3 rounded-md border border-gray-700 bg-gray-900/95 shadow-xl">
-            <div className="text-[11px] text-gray-400 uppercase tracking-wider">{hover.id}</div>
-            <div className="text-white font-semibold">{hover.label}</div>
-            <div className="text-gray-400 text-sm mt-1">{hover.desc}</div>
-          </div>
+              {branchLines.map(branch => {
+                const by = BASE_Y + branch.y;
+                return (
+                  <g key={`branch-nodes-${branch.id}`}>
+                    {branch.nodes.map(node => {
+                      const labelDy = node.labelPosition === 'top' ? -10 : 12;
+                      const o = appearAt(node.x);
+                      return (
+                        <g key={node.id}>
+                          {tick(node.x, by, node.labelPosition, 6)}
+                          <motion.circle
+                            cx={node.x} cy={by} r={2} fill="#9ca3af"
+                            style={{ opacity: o }}
+                          />
+                          <motion.text
+                            x={node.x} y={by + labelDy}
+                            textAnchor="middle" fontSize="9" fill="#9ca3af"
+                            style={{ opacity: o }}
+                          >
+                            {node.label}
+                          </motion.text>
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
+              })}
+            </motion.g>
+          </svg>
         </div>
-      )}
-
-      <div className="absolute left-6 right-6 bottom-6">
       </div>
     </div>
   );

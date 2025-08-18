@@ -1,6 +1,7 @@
 'use client';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import CodeTerminal from './CodeTerminal';
+import { TERMINAL_FILES } from './constants';
 
 type IconProps = { className?: string };
 
@@ -308,7 +309,13 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <CodeTerminal />
+      <CodeTerminal
+        files={TERMINAL_FILES}
+        typingSpeed={4}        // ms per char
+        betweenFilesDelay={900} // ms pause between files
+        restartDelay={1400}     // ms before restarting whole cycle
+        lineHeightPx={12}
+      />
     </div>
   );
 }
