@@ -8,8 +8,19 @@ const GithubIcon = () => (
 );
 
 const TelegramIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M21 3L3 11l6 2m12-10L10 16l-1 6 3-5m9-14L10 16" />
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M22 2 11 13" />
+    <path d="M22 2 15 22l-4-9-9-4 20-7z" />
   </svg>
 );
 
@@ -21,10 +32,22 @@ const MailIcon = () => (
 );
 
 const OutlookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="6" y="3" width="16" height="18" rx="2" />
-    <path d="M2 7h10v10H2z" />
-    <path d="M6 12h2" />
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="9" y="5" width="12" height="14" rx="2" />
+    <path d="M9 9l6 4 6-4" />
+
+    <rect x="3" y="7" width="7" height="10" rx="1.5" />
+    <circle cx="6.5" cy="12" r="2.5" />
   </svg>
 );
 
