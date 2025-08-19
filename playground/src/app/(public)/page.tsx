@@ -103,7 +103,7 @@ const useScrollSnap = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const isScrolling = useRef(false);
-  const scrollTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimeout = useRef<any>();
 
   useEffect(() => {
     const sections = ['home', 'about', 'roadmap', 'projects', 'contact'];
