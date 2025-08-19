@@ -369,10 +369,6 @@ export default function HomePage() {
         ))}
       </nav>
 
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 text-xs md:text-sm text-white/60 z-50">
-        Scroll / Swipe · ↑/↓ / PgUp/PgDn · Click dots
-      </div>
-
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 transition-all duration-700"
         style={{
@@ -400,3 +396,4 @@ export default function HomePage() {
     </div>
   );
 }
+
