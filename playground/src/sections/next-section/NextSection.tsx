@@ -44,19 +44,44 @@ type Branch = {
 
 type CoreValue = {
   id: string;
-  label: string;
+  label: string; 
   description: string;
 };
 
-export default function ProductRoadmapFlow() {
-  const svgRef = useRef<SVGSVGElement | null>(null);
+function useFirstTimeInView<T extends Element>(
+  threshold = 0.4
+): [React.RefObject<T>, boolean] {
+  const ref = useRef<T | null>(null);
+  const [entered, setEntered] = useState(false);
 
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || entered) return;
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= threshold) {
+          setEntered(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: [0, 0.25, threshold, 0.75, 1] }
+    );
+
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, [entered, threshold]);
+
+  return [ref, entered];
+}
+
+export default function ProductRoadmapFlow() {
   const coreValues: CoreValue[] = [
-    { id: 'clarity',    label: 'CLARITY',    description: 'Clean design & readable code' },
-    { id: 'reliability',label: 'RELIABILITY',description: 'Systems you can trust' },
-    { id: 'efficiency', label: 'EFFICIENCY', description: 'Idea → MVP in weeks' },
-    { id: 'adaptability',label:'ADAPTABILITY',description:'Learn & integrate fast' },
-    { id: 'growth',     label: 'GROWTH',     description: 'Each project → stronger' },
+    { id: 'clarity',     label: 'CLARITY',     description: 'Clean design & readable code' },
+    { id: 'reliability', label: 'RELIABILITY', description: 'Systems you can trust' },
+    { id: 'efficiency',  label: 'EFFICIENCY',  description: 'Idea → MVP in weeks' },
+    { id: 'adaptability',label: 'ADAPTABILITY',description:'Learn & integrate fast' },
+    { id: 'growth',      label: 'GROWTH',      description: 'Each project → stronger' },
   ];
 
   const mainTimeline: MainNode[] = [
@@ -153,33 +178,20 @@ export default function ProductRoadmapFlow() {
 
   const [following, setFollowing] = useState(false);
   const [valuesVisible, setValuesVisible] = useState(false);
-
-  useEffect(() => {
-    const unsub = axisX2.on('change', (v) => {
-      if (following) {
-        cameraFocusX.set(v + 30);
-      }
-    });
-    return () => unsub();
-  }, [following, cameraFocusX, axisX2]);
-
-  const groupX = useTransform(cameraFocusX, (fx) => {
-    const desired = VIEW_W / 2 - fx;
-    const min = VIEW_W / 2 - END_X - 20;
-    const max = VIEW_W / 2 - START_X + 20;
-    return Math.max(min, Math.min(max, desired));
-  });
-
   const [ideaVisible, setIdeaVisible] = useState(false);
 
+  const [sectionRef, inView] = useFirstTimeInView<HTMLDivElement>(0.4);
+
   useEffect(() => {
+    if (!inView) return;
     let mounted = true;
 
     (async () => {
       setValuesVisible(true);
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 650));
+
       setIdeaVisible(true);
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 480));
 
       const LINE_DURATION = 9.0;
       const lineControls = animate(axisX2, END_X, {
@@ -187,7 +199,7 @@ export default function ProductRoadmapFlow() {
         ease: [0.2, 0.0, 0.2, 1.0],
       });
 
-      await new Promise(r => setTimeout(r, 450));
+      await new Promise(r => setTimeout(r, 380));
       if (!mounted) return;
 
       setFollowing(true);
@@ -198,7 +210,6 @@ export default function ProductRoadmapFlow() {
 
       await lineControls.finished;
       if (!mounted) return;
-
       setFollowing(false);
 
       const sceneMid = (START_X + END_X) / 2;
@@ -215,8 +226,24 @@ export default function ProductRoadmapFlow() {
       ]);
     })();
 
-    return () => { mounted = false; };
-  }, [axisX2, cameraFocusX, cameraScale]);
+    return () => {  };
+  }, [inView, axisX2, cameraFocusX, cameraScale]);
+
+  useEffect(() => {
+    const unsub = axisX2.on('change', (v) => {
+      if (following) {
+        cameraFocusX.set(v + 30);
+      }
+    });
+    return () => unsub();
+  }, [following, cameraFocusX, axisX2]);
+
+  const groupX = useTransform(cameraFocusX, (fx) => {
+    const desired = VIEW_W / 2 - fx;
+    const min = VIEW_W / 2 - END_X - 20;
+    const max = VIEW_W / 2 - START_X + 20;
+    return Math.max(min, Math.min(max, desired));
+  });
 
   const appearAt = (x: number, pre = 12, post = 3) =>
     useTransform(axisX2, [x - pre, x + post], [0, 1]);
@@ -297,144 +324,74 @@ export default function ProductRoadmapFlow() {
     );
   };
 
+  const valuesContainerVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { when: 'beforeChildren', staggerChildren: 0.12 }
+    }
+  } as const;
+
+  const valueItemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } }
+  } as const;
+
+  const NumberCircle = ({ n }: { n: number }) => (
+    <div className="relative inline-flex items-center justify-center">
+      <motion.span
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: valuesVisible ? 1.05 : 0.9, opacity: valuesVisible ? 0.5 : 0 }}
+        transition={{ duration: 0.6, repeat: valuesVisible ? Infinity : 0, repeatType: 'mirror' }}
+        className="absolute inset-0 rounded-full border border-amber-400/50"/>
+      <div className="h-10 w-10 rounded-full bg-amber-500/90 text-black font-extrabold tracking-tight flex items-center justify-center shadow-[0_0_0_1px_#1f2937]">
+        {n}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="border border-gray-900 rounded-sm p-4 md:p-6 bg-black/50 backdrop-blur-sm">
+    <section ref={sectionRef} className="border border-gray-900 rounded-sm p-4 md:p-6 bg-black/50 backdrop-blur-sm">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-left select-none text-white mb-4">
-          Building Products — Step by Step
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-left select-none text-white mb-4">
+          <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+            Building Products — Fast & Precise
+          </span>
         </h1>
 
-        <div className="relative w-full h-32 mb-6 flex items-center justify-center">
-          <svg width="100%" height="130" viewBox="0 0 500 130" className="overflow-visible">
-            <defs>
-              <linearGradient id="amberGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"  stopColor="#fbbf24" />
-                <stop offset="55%" stopColor="#f59e0b" />
-                <stop offset="100%" stopColor="#d97706" />
-              </linearGradient>
-              <filter id="glowAmber" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="0" stdDeviation="1.6" floodColor="#f59e0b" floodOpacity="0.35" />
-              </filter>
-              <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.6)"/>
-                <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-              </linearGradient>
-            </defs>
-
-            {(() => {
-              const LEFT = 50;
-              const RIGHT = 450;
-              const BASE_Y = 98; 
-              const PILLAR_W = 16;
-              const PILLAR_H = 42;
-              const CAP_H = 4;
-              const BASE_H = 3;
-              const spacing = coreValues.length > 1 ? (RIGHT - LEFT) / (coreValues.length - 1) : 0;
-
-              return (
-                <>
-                  <motion.line
-                    x1={LEFT - 24} y1={BASE_Y} x2={RIGHT + 24} y2={BASE_Y}
-                    stroke="#4b5563" strokeWidth={2}
-                    strokeLinecap="square"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: valuesVisible ? 1 : 0 }}
-                    transition={{ duration: 0.9, ease: 'easeInOut' }}
-                  />
-
-                  {coreValues.map((value, idx) => {
-                    const x = LEFT + idx * spacing;
-                    const pillarX = x - PILLAR_W / 2;
-                    const delay = 0.20 + idx * 0.12;
-
-                    return (
-                      <g key={value.id}>
-                        <motion.rect
-                          x={pillarX - 6} y={BASE_Y} width={PILLAR_W + 12} height={BASE_H}
-                          fill="#111827" stroke="#374151" strokeWidth={1}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: valuesVisible ? 1 : 0 }}
-                          transition={{ duration: 0.3, delay }}
-                        />
-
-                        <motion.g
-                          initial={{ scaleY: 0, opacity: 0 }}
-                          animate={{ scaleY: valuesVisible ? 1 : 0, opacity: valuesVisible ? 1 : 0 }}
-                          transition={{ duration: 0.45, delay: delay + 0.05, ease: [0.2, 0.0, 0.2, 1] }}
-                          style={{ transformOrigin: `${x}px ${BASE_Y}px` }}
-                          filter="url(#glowAmber)"
-                        >
-                          <rect
-                            x={pillarX} y={BASE_Y - PILLAR_H}
-                            width={PILLAR_W} height={PILLAR_H}
-                            rx={2}
-                            fill="url(#amberGrad)"
-                            stroke="#1f2937"
-                            strokeWidth={1}
-                          />
-                          <rect
-                            x={pillarX + 2}
-                            y={BASE_Y - PILLAR_H}
-                            width={PILLAR_W - 4}
-                            height={Math.max(8, PILLAR_H * 0.35)}
-                            rx={1.6}
-                            fill="url(#gloss)"
-                            style={{ mixBlendMode: 'screen' as any }}
-                          />
-                          <rect
-                            x={pillarX - 2}
-                            y={BASE_Y - PILLAR_H - CAP_H}
-                            width={PILLAR_W + 4}
-                            height={CAP_H}
-                            rx={1.6}
-                            fill="#f59e0b"
-                            stroke="#1f2937"
-                            strokeWidth={1}
-                          />
-                        </motion.g>
-
-                        <motion.text
-                          x={x}
-                          y={BASE_Y - PILLAR_H - CAP_H - 7}
-                          textAnchor="middle"
-                          fontSize="11"
-                          fontWeight={800}
-                          letterSpacing="0.06em"
-                          fill="#f59e0b"
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: valuesVisible ? 1 : 0, y: valuesVisible ? 0 : -4 }}
-                          transition={{ duration: 0.35, delay: delay + 0.18, ease: 'easeOut' }}
-                        >
-                          {value.label}
-                        </motion.text>
-
-                        {/* Description (gray-400) */}
-                        <motion.text
-                          x={x}
-                          y={BASE_Y + 14}
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#9ca3af"
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: valuesVisible ? 1 : 0, y: valuesVisible ? 0 : 4 }}
-                          transition={{ duration: 0.35, delay: delay + 0.22, ease: 'easeOut' }}
-                        >
-                          {value.description}
-                        </motion.text>
-                      </g>
-                    );
-                  })}
-                </>
-              );
-            })()}
-          </svg>
-        </div>
+        <motion.div
+          variants={valuesContainerVariants}
+          initial="hidden"
+          animate={valuesVisible ? 'show' : 'hidden'}
+          className="mx-auto w-full max-w-2xl"
+        >
+          {coreValues.map((v, i) => (
+            <motion.div
+              key={v.id}
+              variants={valueItemVariants}
+              className="w-full py-3 first:pt-0 last:pb-0"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="text-[13px] sm:text-sm font-extrabold tracking-[0.12em] uppercase text-amber-400 mb-1">
+                  {v.label}
+                </div>
+                <NumberCircle n={i + 1} />
+                <p className="mt-2 text-[12px] sm:text-[13px] leading-relaxed text-gray-300 max-w-[38ch]">
+                  {v.description}
+                </p>
+              </div>
+              {i < coreValues.length - 1 && (
+                <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
 
       <div className="relative w-full h-[350px] bg-black border border-gray-800 rounded-sm overflow-hidden">
         <div className="relative w-full h-full">
           <svg
-            ref={svgRef}
             className="w-full h-full"
             viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
             preserveAspectRatio="xMidYMid meet"
@@ -448,7 +405,7 @@ export default function ProductRoadmapFlow() {
                 strokeWidth={1}
                 x2={axisX2}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                animate={{ opacity: inView ? 1 : 0 }}
                 transition={{ duration: 0.6, ease: 'easeOut' }}
               />
 
@@ -500,8 +457,8 @@ export default function ProductRoadmapFlow() {
                             />
                             <motion.circle
                               cx={n.x} cy={BASE_Y} r={2.5}
-                              fill={n.isBranch ? "transparent" : "#f59e0b"}
-                              stroke={n.isBranch ? "#f59e0b" : "none"}
+                              fill={n.isBranch ? 'transparent' : '#f59e0b'}
+                              stroke={n.isBranch ? '#f59e0b' : 'none'}
                               strokeWidth={n.isBranch ? 1 : 0}
                               style={{ opacity: o }}
                             />
@@ -585,6 +542,6 @@ export default function ProductRoadmapFlow() {
           </svg>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
