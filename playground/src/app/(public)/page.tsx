@@ -33,13 +33,10 @@ const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
       <div className="bg-black/80 backdrop-blur-md border-b border-gray-900">
         <div className="px-4 md:px-8 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
-            {/* Логотип */}
             <div className="flex items-center gap-4">
               <span className="text-2xl font-bold text-white">MNX</span>
-              <span className="hidden md:inline text-gray-500 text-sm">Backend Developer</span>
             </div>
             
-            {/* Desktop навигация */}
             <nav className="hidden md:flex items-center gap-6">
               {navItems.map((item) => (
                 <a
@@ -102,41 +99,81 @@ const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
   );
 };
 
-const useScrollProgress = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
+const useScrollSnap = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const isScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
+    const sections = ['home', 'about', 'roadmap', 'projects', 'contact'];
+    
     const handleScroll = () => {
+      if (isScrolling.current) return;
+      
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
       
-      const progress = scrollTop / (documentHeight - windowHeight);
-      setScrollProgress(progress);
-      
-      const section = Math.floor(scrollTop / windowHeight);
+      const section = Math.round(scrollTop / windowHeight);
       setCurrentSection(section);
-      
       setIsHeaderVisible(scrollTop > windowHeight * 0.8);
+      
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+      
+      scrollTimeout.current = setTimeout(() => {
+        const targetSection = Math.round(scrollTop / windowHeight);
+        const targetY = targetSection * windowHeight;
+        
+        if (Math.abs(scrollTop - targetY) > 5) {
+          isScrolling.current = true;
+          
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+          });
+          
+          setTimeout(() => {
+            isScrolling.current = false;
+          }, 600);
+        }
+      }, 150);
     };
 
-    handleScroll();
+    const handleWheel = (e: WheelEvent) => {
+      if (isScrolling.current) {
+        e.preventDefault();
+        return;
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: false });
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
   }, []);
 
-  return { scrollProgress, currentSection, isHeaderVisible };
+  return { currentSection, isHeaderVisible };
 };
 
 export default function HomePage() {
-  const { scrollProgress, currentSection, isHeaderVisible } = useScrollProgress();
+  const { currentSection, isHeaderVisible } = useScrollSnap();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    return () => {
+      document.documentElement.style.scrollBehavior = 'auto';
+    };
   }, []);
 
   return (
@@ -163,9 +200,7 @@ export default function HomePage() {
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[120%]">
               <div className="relative h-[2px]">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent"></div>
-                
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-sm"></div>
-                
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                   <div className="absolute inset-0 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div>
