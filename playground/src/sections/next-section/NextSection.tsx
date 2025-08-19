@@ -42,8 +42,22 @@ type Branch = {
   nodes: NodeBase[];
 };
 
+type CoreValue = {
+  id: string;
+  label: string;
+  description: string;
+};
+
 export default function ProductRoadmapFlow() {
   const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const coreValues: CoreValue[] = [
+    { id: 'clarity', label: 'Clarity', description: 'Clean design and readable code' },
+    { id: 'reliability', label: 'Reliability', description: 'Systems that you can trust' },
+    { id: 'efficiency', label: 'Efficiency', description: 'From idea to MVP in weeks, not months' },
+    { id: 'adaptability', label: 'Adaptability', description: 'Learning and integrating fast' },
+    { id: 'growth', label: 'Growth', description: 'Each project makes me stronger' },
+  ];
 
   const mainTimeline: MainNode[] = [
     { id: 'idea',     label: 'Idea',     x: 50,  description: 'Initial concept & vision', labelPosition: 'bottom', hasChildren: false },
@@ -138,6 +152,8 @@ export default function ProductRoadmapFlow() {
   const cameraScale  = useMotionValue<number>(1.8);
 
   const [following, setFollowing] = useState(false);
+  const [valuesVisible, setValuesVisible] = useState(false);
+
   useEffect(() => {
     const unsub = axisX2.on('change', (v) => {
       if (following) {
@@ -160,6 +176,9 @@ export default function ProductRoadmapFlow() {
     let mounted = true;
 
     (async () => {
+      setValuesVisible(true);
+      await new Promise(r => setTimeout(r, 800));
+      
       setIdeaVisible(true);
       await new Promise(r => setTimeout(r, 500));
 
@@ -283,10 +302,82 @@ export default function ProductRoadmapFlow() {
 
   return (
     <div className="border border-gray-900 rounded-sm p-4 md:p-6 bg-black/50 backdrop-blur-sm">
-      <div className="mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-left select-none text-white">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-left select-none text-white mb-4">
           Building Products - Step by Step
         </h1>
+        
+        <div className="relative w-full h-32 mb-6 flex items-center justify-center">
+          <svg width="100%" height="130" viewBox="0 0 500 130" className="overflow-visible">
+            <motion.line
+              x1="50" y1="70" x2="450" y2="70"
+              stroke="#4b5563" strokeWidth="3"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: valuesVisible ? 1 : 0 }}
+              transition={{ duration: 1.2, ease: 'easeInOut' }}
+            />
+            
+            {coreValues.map((value, index) => {
+              const x = 50 + (index * 100);
+              return (
+                <g key={value.id}>
+                  <motion.rect
+                    x={x - 12} y="50" width="24" height="40"
+                    fill="#f59e0b" stroke="#1f2937" strokeWidth="2"
+                    rx="2"
+                    initial={{ scaleY: 0, opacity: 0 }}
+                    animate={{ 
+                      scaleY: valuesVisible ? 1 : 0,
+                      opacity: valuesVisible ? 1 : 0 
+                    }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: 0.3 + (index * 0.15),
+                      ease: 'backOut'
+                    }}
+                    style={{ transformOrigin: `${x}px 90px` }}
+                  />
+                  
+                  <motion.text
+                    x={x} y="35" 
+                    textAnchor="middle" 
+                    fontSize="16" 
+                    fontWeight="700"
+                    fill="#f59e0b"
+                    transform={`rotate(-12 ${x} 35)`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ 
+                      opacity: valuesVisible ? 1 : 0,
+                      y: valuesVisible ? 0 : 10
+                    }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: 0.6 + (index * 0.15),
+                      ease: 'easeOut'
+                    }}
+                  >
+                    {value.label}
+                  </motion.text>
+                  
+                  <motion.foreignObject
+                    x={x - 35} y="100" width="70" height="25"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: valuesVisible ? 1 : 0 }}
+                    transition={{ 
+                      duration: 0.4, 
+                      delay: 0.9 + (index * 0.15),
+                      ease: 'easeOut'
+                    }}
+                  >
+                    <div className="text-center text-xs text-gray-400 leading-tight">
+                      {value.description}
+                    </div>
+                  </motion.foreignObject>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
 
       <div className="relative w-full h-[350px] bg-black border border-gray-800 rounded-sm overflow-hidden">
