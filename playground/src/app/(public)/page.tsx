@@ -267,49 +267,53 @@ export default function HomePage() {
         }}
       >
         <div className="w-full" style={translateStyle}>
-          <section
-            id="home"
-            className={`h-screen w-screen relative flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-orange-500/5 via-transparent to-transparent"></div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.03)_0%,transparent_70%)]"></div>
-            </div>
+         <section
+  id="home"
+  className={`h-screen w-screen relative flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${
+    isLoaded ? 'opacity-100' : 'opacity-0'
+  }`}
+>
+  <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.03)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.03)_50%,rgba(255,255,255,0.03)_75%,transparent_75%,transparent)] bg-[length:40px_40px] opacity-20" />
+  </div>
 
-            <div className="relative z-10 text-center px-4">
-              <div className="relative inline-block">
-                <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-white mb-4">MNX</h1>
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[120%]">
-                  <div className="relative h-[2px]">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-sm"></div>
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                      <div className="absolute inset-0 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+  <div className="relative z-10 text-center px-4">
+    <div className="relative inline-block">
+      <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-extrabold tracking-tighter bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
+        MNX
+      </h1>
 
-              <p className="text-gray-400 text-sm md:text-lg tracking-[0.3em] uppercase mt-8">Backend Developer</p>
-              <p className="text-gray-500 text-xs md:text-sm tracking-wider uppercase mt-2">System Architect • API Specialist</p>
+      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+        <div className="relative w-3 h-3">
+          <div className="w-3 h-3 rounded-full bg-gray-300 shadow-[0_0_20px_5px_rgba(150,150,255,0.6)] animate-pulse" />
+          <div className="absolute inset-0 rounded-full bg-blue-400/40 blur-sm animate-ping" />
+        </div>
+      </div>
+    </div>
 
-              <div
-                className={`absolute bottom-12 left-1/2 -translate-x-1/2 transition-opacity duration-500 ${
-                  activeIndex > 0 ? 'opacity-0' : 'opacity-100'
-                }`}
-              >
-                <div className="flex flex-col items-center gap-2 text-gray-600">
-                  <span className="text-xs uppercase tracking-wider">Scroll</span>
-                  <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </section>
+    {/* Подзаголовки */}
+    <p className="text-gray-400 text-sm md:text-lg tracking-[0.4em] uppercase mt-8">
+      Backend Developer
+    </p>
+    <p className="text-gray-500 text-xs md:text-sm tracking-widest uppercase mt-2 font-light">
+      System Architect • API Specialist
+    </p>
+
+    <div
+      className={`absolute bottom-12 left-1/2 -translate-x-1/2 transition-opacity duration-500 ${
+        activeIndex > 0 ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
+      <div className="flex flex-col items-center gap-2 text-gray-600">
+        <span className="text-xs uppercase tracking-wider">Scroll</span>
+        <div className="w-[1px] h-10 bg-gray-500 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-white to-transparent animate-[scrollLine_2s_linear_infinite]" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
           <section
             id="about"
@@ -396,4 +400,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 
