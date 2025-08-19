@@ -103,10 +103,9 @@ const useScrollSnap = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const isScrolling = useRef(false);
-  const scrollTimeout = useRef<any>();
 
   useEffect(() => {
-    const sections = ['home', 'about', 'roadmap', 'projects', 'contact'];
+    let scrollTimeout: number | undefined;
     
     const handleScroll = () => {
       if (isScrolling.current) return;
@@ -118,11 +117,11 @@ const useScrollSnap = () => {
       setCurrentSection(section);
       setIsHeaderVisible(scrollTop > windowHeight * 0.8);
       
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
       }
       
-      scrollTimeout.current = setTimeout(() => {
+      scrollTimeout = window.setTimeout(() => {
         const targetSection = Math.round(scrollTop / windowHeight);
         const targetY = targetSection * windowHeight;
         
@@ -154,8 +153,8 @@ const useScrollSnap = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('wheel', handleWheel);
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
       }
     };
   }, []);
