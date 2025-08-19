@@ -50,7 +50,7 @@ type CoreValue = {
 
 function useFirstTimeInView<T extends Element>(
   threshold = 0.4
-): [React.RefObject<T>, boolean] {
+): [React.RefObject<T | null>, boolean] {
   const ref = useRef<T | null>(null);
   const [entered, setEntered] = useState(false);
 
@@ -74,6 +74,7 @@ function useFirstTimeInView<T extends Element>(
 
   return [ref, entered];
 }
+
 
 export default function ProductRoadmapFlow() {
   const coreValues: CoreValue[] = [
@@ -545,3 +546,4 @@ export default function ProductRoadmapFlow() {
     </section>
   );
 }
+
