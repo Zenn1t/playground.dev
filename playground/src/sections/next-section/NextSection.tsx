@@ -9,6 +9,10 @@ import {
   animate,
 } from 'framer-motion';
 
+// =====================================================
+// Types
+// =====================================================
+
 type LabelPos = 'top' | 'bottom';
 
 type NodeBase = {
@@ -44,9 +48,13 @@ type Branch = {
 
 type CoreValue = {
   id: string;
-  label: string; 
+  label: string; // TITLE
   description: string;
 };
+
+// =====================================================
+// Small util: first-time-in-view hook (typesafe)
+// =====================================================
 
 function useFirstTimeInView<T extends Element>(
   threshold = 0.4
@@ -75,8 +83,12 @@ function useFirstTimeInView<T extends Element>(
   return [ref, entered];
 }
 
+// =====================================================
+// Main Component
+// =====================================================
 
 export default function ProductRoadmapFlow() {
+  // ---------- DATA ----------
   const coreValues: CoreValue[] = [
     { id: 'clarity',     label: 'CLARITY',     description: 'Clean design & readable code' },
     { id: 'reliability', label: 'RELIABILITY', description: 'Systems you can trust' },
@@ -166,6 +178,7 @@ export default function ProductRoadmapFlow() {
     return m;
   }, []);
 
+  // ---------- CAMERA / SVG STATE ----------
   const VIEW_W = 550;
   const VIEW_H = 350;
   const BASE_Y = 175;
@@ -181,19 +194,24 @@ export default function ProductRoadmapFlow() {
   const [valuesVisible, setValuesVisible] = useState(false);
   const [ideaVisible, setIdeaVisible] = useState(false);
 
+  // ---------- VIEWPORT TRIGGER ----------
   const [sectionRef, inView] = useFirstTimeInView<HTMLDivElement>(0.4);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView) return; // Start only once on first visibility
+
     let mounted = true;
 
     (async () => {
+      // 1) Reveal the values list (hero) with stagger
       setValuesVisible(true);
       await new Promise(r => setTimeout(r, 650));
 
+      // 2) Seed idea point
       setIdeaVisible(true);
       await new Promise(r => setTimeout(r, 480));
 
+      // 3) Run main line draw and camera follow
       const LINE_DURATION = 9.0;
       const lineControls = animate(axisX2, END_X, {
         duration: LINE_DURATION,
@@ -213,6 +231,7 @@ export default function ProductRoadmapFlow() {
       if (!mounted) return;
       setFollowing(false);
 
+      // 4) Final settle: center the scene, slight zoom out
       const sceneMid = (START_X + END_X) / 2;
       const finalCenter = sceneMid;
       await Promise.all([
@@ -227,9 +246,10 @@ export default function ProductRoadmapFlow() {
       ]);
     })();
 
-    return () => {  };
+    return () => { /* stop */ };
   }, [inView, axisX2, cameraFocusX, cameraScale]);
 
+  // Keep camera focus synced when following the draw head
   useEffect(() => {
     const unsub = axisX2.on('change', (v) => {
       if (following) {
@@ -239,6 +259,7 @@ export default function ProductRoadmapFlow() {
     return () => unsub();
   }, [following, cameraFocusX, axisX2]);
 
+  // ---------- Derived transforms ----------
   const groupX = useTransform(cameraFocusX, (fx) => {
     const desired = VIEW_W / 2 - fx;
     const min = VIEW_W / 2 - END_X - 20;
@@ -325,6 +346,10 @@ export default function ProductRoadmapFlow() {
     );
   };
 
+  // =====================================================
+  // PRESENTATION (values as bold circle steps) - HORIZONTAL
+  // =====================================================
+
   const valuesContainerVariants = {
     hidden: { opacity: 0, y: 8 },
     show: {
@@ -339,57 +364,55 @@ export default function ProductRoadmapFlow() {
     show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } }
   } as const;
 
+  // helper to render a numbered circle
   const NumberCircle = ({ n }: { n: number }) => (
-    <div className="relative inline-flex items-center justify-center">
+    <motion.div className="relative inline-flex items-center justify-center">
       <motion.span
         initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: valuesVisible ? 1.05 : 0.9, opacity: valuesVisible ? 0.5 : 0 }}
-        transition={{ duration: 0.6, repeat: valuesVisible ? Infinity : 0, repeatType: 'mirror' }}
-        className="absolute inset-0 rounded-full border border-amber-400/50"/>
-      <div className="h-10 w-10 rounded-full bg-amber-500/90 text-black font-extrabold tracking-tight flex items-center justify-center shadow-[0_0_0_1px_#1f2937]">
+        animate={valuesVisible ? { scale: [0.95, 1.05, 0.98], opacity: 0.45 } : { scale: 0.9, opacity: 0 }}
+        transition={{ duration: 1.2, repeat: valuesVisible ? Infinity : 0, repeatType: 'loop' }}
+        className="absolute inset-0 rounded-full border border-amber-400/30"
+      />
+      <div className="h-12 w-12 rounded-full bg-amber-500/95 text-black font-extrabold tracking-tight flex items-center justify-center shadow-[0_0_0_1px_#1f2937]">
         {n}
       </div>
-    </div>
+    </motion.div>
   );
 
   return (
     <section ref={sectionRef} className="border border-gray-900 rounded-sm p-4 md:p-6 bg-black/50 backdrop-blur-sm">
+      {/* ---------- HEADER (restored original title) ---------- */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-left select-none text-white mb-4">
-          <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
-            Building Products — Fast & Precise
-          </span>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-left select-none text-white mb-4">
+          Building Products — Step by Step
         </h1>
 
+        {/* HORIZONTAL VALUES: on small devices stack, on sm+ show row */}
         <motion.div
           variants={valuesContainerVariants}
           initial="hidden"
           animate={valuesVisible ? 'show' : 'hidden'}
-          className="mx-auto w-full max-w-2xl"
+          className="w-full"
         >
-          {coreValues.map((v, i) => (
-            <motion.div
-              key={v.id}
-              variants={valueItemVariants}
-              className="w-full py-3 first:pt-0 last:pb-0"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="text-[13px] sm:text-sm font-extrabold tracking-[0.12em] uppercase text-amber-400 mb-1">
-                  {v.label}
+          <div className="flex flex-col sm:flex-row items-stretch justify-between gap-6 mx-auto w-full max-w-full">
+            {coreValues.map((v, i) => (
+              <motion.div key={v.id} variants={valueItemVariants} className="flex-1 min-w-[120px] max-w-[20%]">
+                <div className="flex flex-col items-center text-center">
+                  <div className="text-[12px] sm:text-sm font-extrabold tracking-[0.12em] uppercase text-amber-400 mb-2">
+                    {v.label}
+                  </div>
+                  <NumberCircle n={i + 1} />
+                  <p className="mt-3 text-[12px] sm:text-[13px] leading-relaxed text-gray-300 max-w-[28ch]">
+                    {v.description}
+                  </p>
                 </div>
-                <NumberCircle n={i + 1} />
-                <p className="mt-2 text-[12px] sm:text-[13px] leading-relaxed text-gray-300 max-w-[38ch]">
-                  {v.description}
-                </p>
-              </div>
-              {i < coreValues.length - 1 && (
-                <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
-              )}
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
       </div>
 
+      {/* ---------- TIMELINE (SVG) ---------- */}
       <div className="relative w-full h-[350px] bg-black border border-gray-800 rounded-sm overflow-hidden">
         <div className="relative w-full h-full">
           <svg
@@ -398,6 +421,7 @@ export default function ProductRoadmapFlow() {
             preserveAspectRatio="xMidYMid meet"
           >
             <motion.g style={{ x: groupX, scale: cameraScale }}>
+              {/* main line grow */}
               <motion.line
                 x1={START_X}
                 y1={BASE_Y}
@@ -546,4 +570,3 @@ export default function ProductRoadmapFlow() {
     </section>
   );
 }
-
