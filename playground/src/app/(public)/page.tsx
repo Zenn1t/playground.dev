@@ -4,12 +4,13 @@ import type { Metadata } from "next";
 import HeroSection from "@/sections/hero/HeroSection";
 import NextSection from "@/sections/next-section/NextSection";
 
-const Header = ({ isCompact, scrollProgress }: { isCompact: boolean; scrollProgress: number }) => {
+const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const navItems = [
+    { label: 'Home', href: '#home' },
     { label: 'About', href: '#about' },
-    { label: 'Skills', href: '#skills' },
+    { label: 'Roadmap', href: '#roadmap' },
     { label: 'Projects', href: '#projects' },
     { label: 'Contact', href: '#contact' },
   ];
@@ -24,136 +25,87 @@ const Header = ({ isCompact, scrollProgress }: { isCompact: boolean; scrollProgr
   };
 
   return (
-    <>
-      <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
-          isCompact ? 'opacity-0 pointer-events-none translate-y-[-100%]' : 'opacity-100'
-        }`}
-      >
-        <div className="p-8 md:p-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col items-center text-center space-y-6">
-              <div className="relative">
-                <div className="text-5xl md:text-7xl font-bold tracking-tighter text-white">
-                  MNX
-                </div>
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-60"></div>
-              </div>
-              
-              <p className="text-gray-400 text-sm md:text-base tracking-wider uppercase">
-                Backend Developer • System Architect
-              </p>
-              
-              <nav className="hidden md:flex items-center gap-8 mt-4">
-                {navItems.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className="text-gray-400 hover:text-orange-500 transition-colors duration-200 text-sm uppercase tracking-wider"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </nav>
-
-              <div className={`mt-8 transition-opacity duration-500 ${scrollProgress > 0.1 ? 'opacity-0' : 'opacity-100'}`}>
-                <div className="flex flex-col items-center gap-2 text-gray-600">
-                  <span className="text-xs uppercase tracking-wider">Scroll</span>
-                  <svg 
-                    className="w-5 h-5 animate-bounce"
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
-              </div>
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none translate-y-[-100%]'
+      }`}
+    >
+      <div className="bg-black/80 backdrop-blur-md border-b border-gray-900">
+        <div className="px-4 md:px-8 py-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            {/* Логотип */}
+            <div className="flex items-center gap-4">
+              <span className="text-2xl font-bold text-white">MNX</span>
+              <span className="hidden md:inline text-gray-500 text-sm">Backend Developer</span>
             </div>
-          </div>
-        </div>
-      </header>
-
-      <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
-          isCompact ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none translate-y-[-100%]'
-        }`}
-      >
-        <div className="bg-black/80 backdrop-blur-md border-b border-gray-900">
-          <div className="px-4 md:px-8 py-4">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold text-white">MNX</span>
-                <span className="hidden md:inline text-gray-500 text-sm">Backend Developer</span>
-              </div>
-              
-              <nav className="hidden md:flex items-center gap-6">
-                {navItems.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className="text-gray-400 hover:text-orange-500 transition-colors duration-200 text-sm"
-                  >
-                    {item.label}
-                  </a>
-                ))}
+            
+            {/* Desktop навигация */}
+            <nav className="hidden md:flex items-center gap-6">
+              {navItems.map((item) => (
                 <a
-                  href="/resume.pdf"
-                  className="px-4 py-2 border border-orange-500/50 text-orange-500 hover:bg-orange-500/10 transition-all duration-200 text-sm rounded-sm"
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="text-gray-400 hover:text-orange-500 transition-colors duration-200 text-sm"
                 >
-                  Resume
+                  {item.label}
                 </a>
-              </nav>
-
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
-                aria-label="Toggle menu"
+              ))}
+              <a
+                href="/resume.pdf"
+                className="px-4 py-2 border border-orange-500/50 text-orange-500 hover:bg-orange-500/10 transition-all duration-200 text-sm rounded-sm"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
+                Resume
+              </a>
+            </nav>
 
-          {isMenuOpen && (
-            <div className="md:hidden border-t border-gray-900 bg-black/95 backdrop-blur-md">
-              <nav className="px-4 py-4 space-y-2">
-                {navItems.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className="block px-4 py-2 text-gray-400 hover:text-orange-500 hover:bg-gray-900/50 transition-all duration-200 text-sm"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-                <a
-                  href="/resume.pdf"
-                  className="block px-4 py-2 border border-orange-500/50 text-orange-500 hover:bg-orange-500/10 transition-all duration-200 text-sm text-center mt-4"
-                >
-                  Download Resume
-                </a>
-              </nav>
-            </div>
-          )}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
-      </header>
-    </>
+
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-900 bg-black/95 backdrop-blur-md">
+            <nav className="px-4 py-4 space-y-2">
+              {navItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="block px-4 py-2 text-gray-400 hover:text-orange-500 hover:bg-gray-900/50 transition-all duration-200 text-sm"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <a
+                href="/resume.pdf"
+                className="block px-4 py-2 border border-orange-500/50 text-orange-500 hover:bg-orange-500/10 transition-all duration-200 text-sm text-center mt-4"
+              >
+                Download Resume
+              </a>
+            </nav>
+          </div>
+        )}
+      </div>
+    </header>
   );
 };
 
 const useScrollProgress = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+  const [currentSection, setCurrentSection] = useState(0);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -164,21 +116,23 @@ const useScrollProgress = () => {
       const progress = scrollTop / (documentHeight - windowHeight);
       setScrollProgress(progress);
       
-      const switchPoint = windowHeight * 0.3;
-      setIsHeaderCompact(scrollTop > switchPoint);
+      const section = Math.floor(scrollTop / windowHeight);
+      setCurrentSection(section);
+      
+      setIsHeaderVisible(scrollTop > windowHeight * 0.8);
     };
 
-    handleScroll(); // Начальная проверка
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  return { scrollProgress, isHeaderCompact };
+  return { scrollProgress, currentSection, isHeaderVisible };
 };
 
 export default function HomePage() {
-  const { scrollProgress, isHeaderCompact } = useScrollProgress();
+  const { scrollProgress, currentSection, isHeaderVisible } = useScrollProgress();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -187,36 +141,87 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono relative">
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-orange-500/10 via-orange-500/5 to-transparent"></div>
-      </div>
-      
-      <Header isCompact={isHeaderCompact} scrollProgress={scrollProgress} />
+      <CompactHeader isVisible={isHeaderVisible} />
       
       <section 
-        id="about"
-        className={`relative min-h-screen flex items-center justify-center pt-32 md:pt-40 px-4 md:px-8 transition-opacity duration-1000 ${
+        id="home"
+        className={`relative h-screen flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <div className="w-full max-w-6xl mx-auto">
-          <div className={`transition-all duration-700 ${
-            isHeaderCompact ? 'scale-100' : 'scale-95'
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-orange-500/5 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.03)_0%,transparent_70%)]"></div>
+        </div>
+
+        <div className="relative z-10 text-center px-4">
+          <div className="relative inline-block">
+            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-white mb-4">
+              MNX
+            </h1>
+            
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[120%]">
+              <div className="relative h-[2px]">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent"></div>
+                
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-sm"></div>
+                
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-gray-400 text-sm md:text-lg tracking-[0.3em] uppercase mt-8">
+            Backend Developer
+          </p>
+          
+          <p className="text-gray-500 text-xs md:text-sm tracking-wider uppercase mt-2">
+            System Architect • API Specialist
+          </p>
+
+          <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 transition-opacity duration-500 ${
+            currentSection > 0 ? 'opacity-0' : 'opacity-100'
           }`}>
-            <HeroSection />
+            <div className="flex flex-col items-center gap-2 text-gray-600">
+              <span className="text-xs uppercase tracking-wider">Scroll</span>
+              <svg 
+                className="w-5 h-5 animate-bounce"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
           </div>
         </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none"></div>
       </section>
       
       <section 
-        id="skills"
-        className={`relative min-h-screen px-4 md:px-8 py-16 md:py-24 transition-all duration-1000 ${
-          scrollProgress > 0.1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        id="about"
+        className={`relative min-h-screen flex items-center justify-center px-4 md:px-8 py-16 transition-all duration-1000 ${
+          currentSection >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent"></div>
+        </div>
+        
+        <div className="w-full max-w-6xl mx-auto relative z-10">
+          <HeroSection />
+        </div>
+      </section>
+      
+      <section 
+        id="roadmap"
+        className={`relative min-h-screen px-4 md:px-8 py-16 md:py-24 flex items-center transition-all duration-1000 ${
+          currentSection >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
+        <div className="max-w-6xl mx-auto w-full">
           <NextSection />
         </div>
       </section>
@@ -241,7 +246,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Простой футер */}
       <footer className="border-t border-gray-900 px-4 md:px-8 py-8 bg-black/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 text-sm">
