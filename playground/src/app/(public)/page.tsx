@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import HeroSection from '@/sections/hero/HeroSection';
 import NextSection from '@/sections/next-section/NextSection';
 
-
-const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
+const CompactHeader = ({
+  isVisible,
+  onGoTo,
+}: {
+  isVisible: boolean;
+  onGoTo?: (id: string) => void;
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -21,10 +26,8 @@ const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
     href: string
   ) => {
     e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      (target as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    const id = href.replace('#', '');
+    onGoTo?.(id);
     setIsMenuOpen(false);
   };
 
@@ -106,44 +109,175 @@ const CompactHeader = ({ isVisible }: { isVisible: boolean }) => {
 };
 
 
-const useActiveSection = () => {
+const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+
+function useStepScroll(sectionIds: string[]) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const sectionsRef = useRef<HTMLElement[]>([]);
+  const isAnimatingRef = useRef(false);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchLockedRef = useRef(false);
+
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+
+  const sectionById = (id: string) => sectionsRef.current.find((el) => el?.id === id) || null;
+
+  const ensureSections = () => {
+    const c = containerRef.current;
+    if (!c) return;
+    sectionsRef.current = sectionIds
+      .map((id) => c.querySelector<HTMLElement>(`section#${id}`))
+      .filter((el): el is HTMLElement => !!el);
+  };
+
+  const waitForScrollTo = (targetTop: number, timeout = 1400) =>
+    new Promise<void>((resolve) => {
+      const c = containerRef.current!;
+      let raf = 0;
+      const t0 = performance.now();
+      const tick = () => {
+        const close = Math.abs(c.scrollTop - targetTop) < 2;
+        const expired = performance.now() - t0 > timeout;
+        if (close || expired) {
+          cancelAnimationFrame(raf);
+          resolve();
+          return;
+        }
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    });
+
+  const goToIndex = async (next: number) => {
+    const c = containerRef.current;
+    if (!c || isAnimatingRef.current) return;
+    ensureSections();
+    const sections = sectionsRef.current;
+    if (!sections.length) return;
+
+    const clamped = clamp(next, 0, sections.length - 1);
+    if (clamped === activeIndex) return;
+
+    isAnimatingRef.current = true;
+    const targetEl = sections[clamped];
+    const top = targetEl.offsetTop;
+
+    c.scrollTo({ top, behavior: 'smooth' });
+    await waitForScrollTo(top);
+    setActiveIndex(clamped);
+    isAnimatingRef.current = false;
+  };
+
+  const goToId = (id: string) => {
+    ensureSections();
+    const idx = sectionsRef.current.findIndex((el) => el.id === id);
+    if (idx >= 0) void goToIndex(idx);
+  };
 
   useEffect(() => {
-    const container = document.querySelector('main[data-scroll-container]');
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>('section[data-snap]')
-    );
-    if (!container || !sections.length) return;
+    const c = containerRef.current;
+    if (!c) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) {
-          const idx = sections.indexOf(visible.target as HTMLElement);
-          setActiveIndex(idx);
-          setIsHeaderVisible(idx > 0);
-        }
-      },
-      {
-        root: container,
-        threshold: [0.5, 0.75],
+    ensureSections();
+
+    const onWheel = (e: WheelEvent) => {
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        return;
       }
-    );
+      e.preventDefault();
+      const dir = Math.sign(e.deltaY);
+      if (dir === 0) return;
+      void goToIndex(activeIndex + (dir > 0 ? 1 : -1));
+    };
 
-    sections.forEach((s) => io.observe(s));
-    return () => io.disconnect();
-  }, []);
+    const onKey = (e: KeyboardEvent) => {
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        return;
+      }
+      if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
+        e.preventDefault();
+        void goToIndex(activeIndex + 1);
+      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        void goToIndex(activeIndex - 1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        void goToIndex(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        ensureSections();
+        void goToIndex(sectionsRef.current.length - 1);
+      }
+    };
 
-  return { activeIndex, isHeaderVisible };
-};
+    const onTouchStart = (e: TouchEvent) => {
+      if (isAnimatingRef.current) return;
+      touchStartYRef.current = e.touches[0].clientY;
+      touchLockedRef.current = false;
+    };
 
+    const onTouchMove = (e: TouchEvent) => {
+      if (isAnimatingRef.current || touchLockedRef.current) return;
+      const start = touchStartYRef.current;
+      if (start == null) return;
+      const dy = e.touches[0].clientY - start;
+      const threshold = 28;
+      if (Math.abs(dy) > threshold) {
+        touchLockedRef.current = true;
+        if (dy < 0) {
+          void goToIndex(activeIndex + 1);
+        } else {
+          void goToIndex(activeIndex - 1);
+        }
+      }
+    };
+
+    const onTouchEnd = () => {
+      touchStartYRef.current = null;
+      touchLockedRef.current = false;
+    };
+
+    c.addEventListener('wheel', onWheel, { passive: false });
+    c.addEventListener('keydown', onKey, { passive: false });
+    c.addEventListener('touchstart', onTouchStart, { passive: true });
+    c.addEventListener('touchmove', onTouchMove, { passive: true });
+    c.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    c.tabIndex = 0;
+
+    const onResize = () => {
+      ensureSections();
+      const el = sectionsRef.current[activeIndex];
+      if (!el) return;
+      c.scrollTo({ top: el.offsetTop });
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      c.removeEventListener('wheel', onWheel as any);
+      c.removeEventListener('keydown', onKey as any);
+      c.removeEventListener('touchstart', onTouchStart as any);
+      c.removeEventListener('touchmove', onTouchMove as any);
+      c.removeEventListener('touchend', onTouchEnd as any);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [activeIndex]);
+
+  const isHeaderVisible = activeIndex > 0;
+  return { activeIndex, isHeaderVisible, goToId, containerRef };
+}
+
+
+const SECTION_IDS = ['home', 'about', 'roadmap', 'projects', 'contact'] as const;
+
+type SectionId = (typeof SECTION_IDS)[number];
 
 export default function HomePage() {
-  const { activeIndex, isHeaderVisible } = useActiveSection();
+  const { activeIndex, isHeaderVisible, goToId, containerRef } = useStepScroll(
+    SECTION_IDS as unknown as string[]
+  );
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -152,16 +286,22 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono relative">
-      <CompactHeader isVisible={isHeaderVisible} />
+      <style jsx global>{`
+        main[data-scroll-container] { -ms-overflow-style: none; scrollbar-width: none; }
+        main[data-scroll-container]::-webkit-scrollbar { display: none; width: 0; height: 0; }
+      `}</style>
+
+      <CompactHeader isVisible={isHeaderVisible} onGoTo={goToId} />
 
       <main
+        ref={containerRef}
         data-scroll-container
-        className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth overscroll-y-contain"
+        className="h-screen overflow-y-scroll overscroll-none outline-none focus:outline-none"
       >
         <section
           id="home"
-          data-snap
-          className={`relative h-screen snap-start flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${
+          data-step
+          className={`relative h-screen flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -173,7 +313,6 @@ export default function HomePage() {
           <div className="relative z-10 text-center px-4">
             <div className="relative inline-block">
               <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold tracking-tighter text-white mb-4">MNX</h1>
-
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[120%]">
                 <div className="relative h-[2px]">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500 to-transparent"></div>
@@ -206,15 +345,14 @@ export default function HomePage() {
 
         <section
           id="about"
-          data-snap
-          className={`relative h-screen snap-start flex items-center justify-center px-4 md:px-8 transition-all duration-1000 ${
-            activeIndex >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          data-step
+          className={`relative h-screen flex items-center justify-center px-4 md:px-8 transition-all duration-700 ${
+            activeIndex >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent"></div>
           </div>
-
           <div className="w-full max-w-6xl mx-auto relative z-10">
             <HeroSection />
           </div>
@@ -222,9 +360,9 @@ export default function HomePage() {
 
         <section
           id="roadmap"
-          data-snap
-          className={`relative h-screen snap-start px-4 md:px-8 py-16 md:py-24 flex items-center transition-all duration-1000 ${
-            activeIndex >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          data-step
+          className={`relative h-screen px-4 md:px-8 py-16 md:py-24 flex items-center transition-all duration-700 ${
+            activeIndex >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
           <div className="max-w-6xl mx-auto w-full">
@@ -234,8 +372,8 @@ export default function HomePage() {
 
         <section
           id="projects"
-          data-snap
-          className="relative h-screen snap-start px-4 md:px-8 py-16 md:py-24 flex items-center justify-center"
+          data-step
+          className="relative h-screen px-4 md:px-8 py-16 md:py-24 flex items-center justify-center"
         >
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-200">Projects</h2>
@@ -245,8 +383,8 @@ export default function HomePage() {
 
         <section
           id="contact"
-          data-snap
-          className="relative h-screen snap-start px-4 md:px-8 py-16 md:py-24 flex items-center justify-center"
+          data-step
+          className="relative h-screen px-4 md:px-8 py-16 md:py-24 flex items-center justify-center"
         >
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-200">Contact</h2>
