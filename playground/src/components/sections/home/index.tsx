@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  opacity: number;
+  duration: number;
+}
+
 const ParticleSystem = () => {
-  const [particles, setParticles] = useState([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    const particleArray = Array.from({ length: 50 }, (_, i) => ({
+    const particleArray: Particle[] = Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -66,7 +77,12 @@ const ParticleSystem = () => {
   );
 };
 
-export default function HomeSection({ isLoaded, activeIndex }) {
+interface HomeSectionProps {
+  isLoaded: boolean;
+  activeIndex: number;
+}
+
+export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps) {
   return (
     <section
       id="home"
