@@ -121,6 +121,11 @@ export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps)
         <p className="text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.25em] uppercase mt-1 sm:mt-2 opacity-70">
           Yes, Really
         </p>
+        
+        <div className="absolute left-1/2 -translate-x-1/2 mt-12">
+          <div className="w-px h-48 bg-gradient-to-b from-gray-600/20 via-gray-500/40 via-gray-400/60 to-gray-300/80 shadow-sm"></div>
+        </div>
+        
         <div
           className={`absolute bottom-12 left-1/2 -translate-x-1/2 transition-opacity duration-500 ${
             activeIndex > 0 ? 'opacity-0' : 'opacity-100'
