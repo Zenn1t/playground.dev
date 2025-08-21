@@ -100,7 +100,7 @@ export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps)
         
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(156,163,175,0.2)_0%,rgba(75,85,99,0.1)_30%,transparent_50%)]" />
         
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_20%,rgba(0,0,0,0.1)_35%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0.6)_70%,rgba(0,0,0,0.85)_85%,rgba(0,0,0,1)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_40%,rgba(0,0,0,0.05)_50%,rgba(0,0,0,0.15)_65%,rgba(0,0,0,0.35)_80%,rgba(0,0,0,0.6)_90%,rgba(0,0,0,0.8)_100%)]" />
       </div>
 
       <ParticleSystem />
