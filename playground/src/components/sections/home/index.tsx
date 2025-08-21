@@ -107,18 +107,18 @@ export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps)
 
       <div className="relative z-10 text-center px-4">
         <div className="relative inline-block">
-          <h1 className="text-7xl md:text-9xl lg:text-[25rem] font-extrabold tracking-tighter bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)] filter">
+          <h1 className="text-[12rem] sm:text-[15rem] md:text-[18rem] lg:text-[25rem] font-extrabold tracking-tighter bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)] filter">
             MNX
           </h1>
         </div>
-        <p className="text-gray-400 text-2xl md:text-3xl lg:text-4xl tracking-[0.4em] uppercase mt-1">
+        <p className="text-gray-400 text-lg sm:text-xl md:text-2xl lg:text-4xl tracking-[0.2em] sm:tracking-[0.3em] md:tracking-[0.4em] uppercase mt-1">
           Backend Developer
         </p>
-        <p className="text-gray-500 text-lg md:text-xl lg:text-2xl tracking-[0.3em] uppercase mt-3 opacity-90">
+        <p className="text-gray-500 text-base sm:text-lg md:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 sm:mt-3 opacity-90">
           4 Years Experience
         </p>
        
-        <p className="text-gray-600 text-sm md:text-base lg:text-lg tracking-[0.25em] uppercase mt-2 opacity-70">
+        <p className="text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.25em] uppercase mt-1 sm:mt-2 opacity-70">
           Yes, Really
         </p>
         <div
