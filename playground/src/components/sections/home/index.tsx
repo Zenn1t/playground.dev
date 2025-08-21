@@ -105,7 +105,7 @@ export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps)
 
       <ParticleSystem />
 
-      <div className="relative z-10 text-center px-4">
+      <div className="relative z-10 text-center px-2 sm:px-4">
         <div className="relative inline-block">
           <h1 className="text-[12rem] sm:text-[15rem] md:text-9xl lg:text-[25rem] font-extrabold tracking-tighter bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent drop-shadow-[0_8px_32px_rgba(0,0,0,0.8)] filter">
             MNX
