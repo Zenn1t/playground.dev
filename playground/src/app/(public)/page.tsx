@@ -50,8 +50,8 @@ export default function HomePage() {
         <div className="w-full" style={translateStyle}>
           <HomeSection isLoaded={isLoaded} activeIndex={activeIndex} />
           <AboutSection activeIndex={activeIndex} />
-          <RoadmapSection activeIndex={activeIndex} />
-          <ProjectsSection activeIndex={activeIndex} />
+          {/* <RoadmapSection activeIndex={activeIndex} />
+          <ProjectsSection activeIndex={activeIndex} /> */}
           <ContactSection activeIndex={activeIndex} />
         </div>
       </main>

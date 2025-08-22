@@ -13,8 +13,8 @@ export default function Header({ isVisible, onGoTo }: HeaderProps) {
   const navItems = [
     { label: 'Home', href: '#home' },
     { label: 'About', href: '#about' },
-    { label: 'Roadmap', href: '#roadmap' },
-    { label: 'Projects', href: '#projects' },
+    // { label: 'Roadmap', href: '#roadmap' },
+    // { label: 'Projects', href: '#projects' },
     { label: 'Contact', href: '#contact' },
   ];
 
