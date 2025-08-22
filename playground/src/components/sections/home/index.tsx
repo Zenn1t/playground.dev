@@ -115,7 +115,7 @@ export default function HomeSection({ isLoaded, activeIndex }: HomeSectionProps)
           Backend Developer
         </p>
         <p className="text-gray-500 text-base sm:text-lg md:text-xl lg:text-2xl tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 sm:mt-3 opacity-90">
-          4 Years Experience
+          2 Years Experience
         </p>
        
         <p className="text-gray-600 text-xs sm:text-sm md:text-base lg:text-lg tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.25em] uppercase mt-1 sm:mt-2 opacity-70">
