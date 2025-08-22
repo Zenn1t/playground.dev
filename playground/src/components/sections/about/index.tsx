@@ -1,8 +1,87 @@
 'use client';
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import CodeTerminal from './CodeTerminal';
 import { TERMINAL_FILES } from './constants';
+
+// Particle System с винными оттенками
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  opacity: number;
+  duration: number;
+}
+
+const WineParticleSystem = () => {
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    const particleArray: Particle[] = Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 2,
+      speedY: (Math.random() - 0.5) * 2,
+      opacity: Math.random() * 0.5 + 0.1,
+      duration: 15 + Math.random() * 10,
+    }));
+    setParticles(particleArray);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((particle) => (
+        <div
+          key={particle.id}
+          className="absolute rounded-full"
+          style={{
+            background: 'linear-gradient(to right, rgb(114, 47, 55), rgb(139, 69, 76))',
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            opacity: particle.opacity,
+            transform: 'translate(-50%, -50%)',
+            animation: `particleFloat${particle.id % 3} ${particle.duration}s infinite linear`,
+          }}
+        />
+      ))}
+      
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes particleFloat0 {
+            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+            25% { transform: translate(-50%, -50%) translateX(50px) translateY(-30px); }
+            50% { transform: translate(-50%, -50%) translateX(-30px) translateY(40px); }
+            75% { transform: translate(-50%, -50%) translateX(40px) translateY(-20px); }
+            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+          }
+          
+          @keyframes particleFloat1 {
+            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+            25% { transform: translate(-50%, -50%) translateX(-40px) translateY(50px); }
+            50% { transform: translate(-50%, -50%) translateX(60px) translateY(-25px); }
+            75% { transform: translate(-50%, -50%) translateX(-20px) translateY(-45px); }
+            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+          }
+          
+          @keyframes particleFloat2 {
+            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+            25% { transform: translate(-50%, -50%) translateX(35px) translateY(40px); }
+            50% { transform: translate(-50%, -50%) translateX(-50px) translateY(-35px); }
+            75% { transform: translate(-50%, -50%) translateX(25px) translateY(30px); }
+            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+          }
+        `
+      }} />
+    </div>
+  );
+};
 
 type IconProps = { className?: string };
 
@@ -238,8 +317,61 @@ export default function AboutSection({ activeIndex }: AboutSectionProps) {
       }`}
     >
       <div className="absolute inset-0 pointer-events-none">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: `linear-gradient(45deg, rgba(114, 47, 55, 0.08) 25%, transparent 25%, transparent 50%, rgba(114, 47, 55, 0.08) 50%, rgba(114, 47, 55, 0.08) 75%, transparent 75%, transparent)`,
+            backgroundSize: '40px 40px'
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0 opacity-15"
+          style={{
+            background: `linear-gradient(135deg, rgba(139, 69, 76, 0.05) 25%, transparent 25%, transparent 50%, rgba(139, 69, 76, 0.05) 50%, rgba(139, 69, 76, 0.05) 75%, transparent 75%, transparent)`,
+            backgroundSize: '60px 60px'
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(114, 47, 55, 0.03) 2px, rgba(114, 47, 55, 0.03) 4px)`
+          }}
+        />
+        <div 
+          className="absolute inset-0 opacity-25"
+          style={{
+            background: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 76, 0.02) 2px, rgba(139, 69, 76, 0.02) 4px)`
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at 30% 20%, rgba(114, 47, 55, 0.15) 0%, transparent 40%)`
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at 70% 80%, rgba(139, 69, 76, 0.12) 0%, transparent 45%)`
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.5) 85%, rgba(0, 0, 0, 0.7) 95%, rgba(0, 0, 0, 0.85) 100%)`
+          }}
+        />
+        
         <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent"></div>
       </div>
+
+      <WineParticleSystem />
+      
       <div className="w-full max-w-6xl mx-auto relative z-10">
         <div
           ref={containerRef}

@@ -128,7 +128,7 @@ const FullScreenEditor = ({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  editorRef: React.RefObject<HTMLDivElement>;
+  editorRef: React.RefObject<HTMLDivElement | null>;
   messageHtml: string;
   onMessageChange: () => void;
   activeFormats: { bold: boolean; italic: boolean; underline: boolean };
