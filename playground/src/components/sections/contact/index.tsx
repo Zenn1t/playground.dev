@@ -69,7 +69,6 @@ const MinimizeIcon = () => (
   </svg>
 );
 
-// Country codes with flags
 const countryCodes = [
   { code: '+1', country: 'US/CA', flag: '🇺🇸' },
   { code: '+7', country: 'RU', flag: '🇷🇺' },
@@ -93,7 +92,6 @@ const countryCodes = [
   { code: '+52', country: 'MX', flag: '🇲🇽' },
 ];
 
-// Editor toolbar button component
 const EditorButton = ({ 
   onClick, 
   active, 
@@ -119,7 +117,6 @@ const EditorButton = ({
   </button>
 );
 
-// Full screen editor modal
 const FullScreenEditor = ({ 
   isOpen, 
   onClose, 
@@ -159,7 +156,6 @@ const FullScreenEditor = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-4xl h-[80vh] bg-gray-950 border border-gray-800 rounded-lg flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h3 className="text-lg font-medium text-gray-200">Compose Message</h3>
           <button
@@ -172,7 +168,6 @@ const FullScreenEditor = ({
           </button>
         </div>
 
-        {/* Toolbar */}
         <div className="flex items-center gap-1 px-6 py-3 border-b border-gray-800">
           <EditorButton 
             onClick={() => {
@@ -240,7 +235,6 @@ const FullScreenEditor = ({
           </EditorButton>
         </div>
 
-        {/* Editor content */}
         <div className="flex-1 overflow-hidden px-6 py-4">
           <div
             ref={modalEditorRef}
@@ -256,7 +250,6 @@ const FullScreenEditor = ({
           />
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
           <span className="text-xs text-gray-600">
             Press Esc to close • Changes are saved automatically
@@ -297,7 +290,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const lastSaveTime = useRef(0);
 
-  // Load saved data from localStorage on mount
   useEffect(() => {
     const savedData = localStorage.getItem('contactFormDraft');
     if (savedData) {
@@ -314,7 +306,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     }
   }, []);
 
-  // Autosave to localStorage
   useEffect(() => {
     const now = Date.now();
     if (now - lastSaveTime.current < 1000) return;
@@ -333,7 +324,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     }
   }, [formData, messageHtml]);
 
-  // Handle Escape key for fullscreen editor
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isFullScreen) {
@@ -344,7 +334,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isFullScreen]);
 
-  // Detect country from phone code
   useEffect(() => {
     if (contactType === 'phone' && formData.contact.startsWith('+')) {
       const input = formData.contact;
@@ -358,7 +347,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     }
   }, [formData.contact, contactType]);
 
-  // Detect and validate contact type
   useEffect(() => {
     const value = formData.contact.trim();
     
@@ -388,7 +376,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     }
   }, [formData.contact]);
 
-  // Check active formats when selection changes
   useEffect(() => {
     const checkFormats = () => {
       const selection = window.getSelection();
