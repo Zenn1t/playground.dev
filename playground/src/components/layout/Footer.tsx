@@ -19,10 +19,17 @@ export default function Footer({ isVisible, transitionMs = 720 }: FooterProps) {
       <footer className="border-t border-gray-900 px-4 md:px-8 py-8 bg-black/90 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
-          <p className="text-xs font-mono bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 
-                         bg-clip-text text-transparent animate-[shine_4s_linear_infinite]">
-            © 2025 Mark Reshetov · MIT Licensed
-          </p>
+        <p className="text-xs font-mono bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 
+                       bg-clip-text text-transparent animate-[shine_4s_linear_infinite]">
+          © 2025 Mark Reshetov · Licensed under the 
+          <a href="https://github.com/Zenn1t/playground.dev/blob/main/LICENSE" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             className="underline hover:opacity-80">
+            Apache License 2.0
+          </a>
+        </p>
+
 
           <div className="flex items-center gap-4">
             <a href="https://github.com/Zenn1t" className="text-gray-600 hover:text-orange-500 transition-colors">
