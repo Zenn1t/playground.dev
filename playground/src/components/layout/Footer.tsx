@@ -21,15 +21,15 @@ export default function Footer({ isVisible, transitionMs = 720 }: FooterProps) {
           
         <p className="text-xs font-mono bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 
                        bg-clip-text text-transparent animate-[shine_4s_linear_infinite]">
-          © 2025 Mark Reshetov · Licensed under the 
-          <a href="https://github.com/Zenn1t/playground.dev/blob/main/LICENSE" 
-             target="_blank" 
-             rel="noopener noreferrer" 
+          © 2025 Mark Reshetov · Licensed under the&nbsp;
+          <a href="https://github.com/Zenn1t/playground.dev/blob/main/LICENSE"
+             target="_blank"
+             rel="noopener noreferrer"
              className="underline hover:opacity-80">
             Apache License 2.0
           </a>
+          &nbsp;— open for learning and reuse.
         </p>
-
 
           <div className="flex items-center gap-4">
             <a href="https://github.com/Zenn1t" className="text-gray-600 hover:text-orange-500 transition-colors">
