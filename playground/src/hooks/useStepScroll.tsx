@@ -36,6 +36,34 @@ export function useStepScroll(sectionIds: readonly string[]) {
 
   const maxIndex = useMemo(() => sectionIds.length - 1, [sectionIds.length]);
 
+  const shouldIgnoreScroll = useCallback((target: EventTarget | null): boolean => {
+    if (!target) return false;
+    
+    let element = target as HTMLElement;
+    while (element && element !== containerRef.current) {
+      if (element.dataset?.scrollIgnore === 'true') {
+        return true;
+      }
+      
+      if (element.scrollHeight > element.clientHeight && 
+          (element.classList?.contains('overflow-y-auto') || 
+           element.classList?.contains('overflow-auto') ||
+           element.style?.overflowY === 'auto' ||
+           element.style?.overflow === 'auto')) {
+        return true;
+      }
+      
+      if (element.tagName === 'INPUT' || 
+          element.tagName === 'TEXTAREA' || 
+          element.contentEditable === 'true') {
+        return true;
+      }
+      
+      element = element.parentElement as HTMLElement;
+    }
+    return false;
+  }, []);
+
   const goToIndex = useCallback((target: number) => {
     const next = clamp(target, 0, maxIndex);
     if (next === activeIndex || animatingRef.current) return;
@@ -58,6 +86,10 @@ export function useStepScroll(sectionIds: readonly string[]) {
   }, [sectionIds, goToIndex]);
 
   const onWheel = useCallback((e: WheelEvent) => {
+    if (shouldIgnoreScroll(e.target)) {
+      return;
+    }
+    
     e.preventDefault();
     if (animatingRef.current) return;
 
@@ -68,22 +100,26 @@ export function useStepScroll(sectionIds: readonly string[]) {
       wheelAccRef.current = 0;
       if (acc > 0) goNext(); else goPrev();
     }
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, shouldIgnoreScroll]);
 
   const onTouchStart = useCallback((e: TouchEvent) => {
+    if (shouldIgnoreScroll(e.target)) return;
     if (animatingRef.current) return;
+    
     const t = e.touches[0];
     touchStartYRef.current = t.clientY;
     touchDeltaYRef.current = 0;
-  }, []);
+  }, [shouldIgnoreScroll]);
 
   const onTouchMove = useCallback((e: TouchEvent) => {
+    if (shouldIgnoreScroll(e.target)) return;
+    
     e.preventDefault();
     const startY = touchStartYRef.current;
     if (startY == null || animatingRef.current) return;
     const currentY = e.touches[0].clientY;
     touchDeltaYRef.current = currentY - startY;
-  }, []);
+  }, [shouldIgnoreScroll]);
 
   const onTouchEnd = useCallback(() => {
     if (animatingRef.current) return;
@@ -96,7 +132,15 @@ export function useStepScroll(sectionIds: readonly string[]) {
   }, [goNext, goPrev]);
 
   const onKeyDown = useCallback((e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.contentEditable === 'true') {
+      return;
+    }
+    
     if (animatingRef.current) return;
+    
     if (['ArrowDown', 'PageDown', 'Space'].includes(e.key)) {
       e.preventDefault();
       goNext();
