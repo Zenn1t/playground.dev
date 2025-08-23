@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { parsePhoneNumberFromString, getCountries, getCountryCallingCode } from 'libphonenumber-js';
 
 interface ContactSectionProps {
   activeIndex: number;
@@ -69,29 +70,6 @@ const MinimizeIcon = () => (
   </svg>
 );
 
-const countryCodes = [
-  { code: '+1', country: 'US/CA', flag: '🇺🇸' },
-  { code: '+7', country: 'RU', flag: '🇷🇺' },
-  { code: '+41', country: 'CH', flag: '🇨🇭' },
-  { code: '+44', country: 'UK', flag: '🇬🇧' },
-  { code: '+49', country: 'DE', flag: '🇩🇪' },
-  { code: '+33', country: 'FR', flag: '🇫🇷' },
-  { code: '+39', country: 'IT', flag: '🇮🇹' },
-  { code: '+34', country: 'ES', flag: '🇪🇸' },
-  { code: '+31', country: 'NL', flag: '🇳🇱' },
-  { code: '+46', country: 'SE', flag: '🇸🇪' },
-  { code: '+47', country: 'NO', flag: '🇳🇴' },
-  { code: '+48', country: 'PL', flag: '🇵🇱' },
-  { code: '+380', country: 'UA', flag: '🇺🇦' },
-  { code: '+86', country: 'CN', flag: '🇨🇳' },
-  { code: '+81', country: 'JP', flag: '🇯🇵' },
-  { code: '+82', country: 'KR', flag: '🇰🇷' },
-  { code: '+91', country: 'IN', flag: '🇮🇳' },
-  { code: '+61', country: 'AU', flag: '🇦🇺' },
-  { code: '+55', country: 'BR', flag: '🇧🇷' },
-  { code: '+52', country: 'MX', flag: '🇲🇽' },
-];
-
 const EditorButton = ({ 
   onClick, 
   active, 
@@ -157,7 +135,7 @@ const FullScreenEditor = ({
       sel?.addRange(range);
       modalEditorRef.current.focus();
     }
-  }, [isOpen]);
+  }, [isOpen, messageHtml]);
 
   const handleModalMessageChange = () => {
     if (modalEditorRef.current) {
@@ -281,7 +259,8 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [contactType, setContactType] = useState<'email' | 'phone' | null>(null);
   const [isContactValid, setIsContactValid] = useState<boolean | null>(null);
-  const [detectedCountry, setDetectedCountry] = useState<typeof countryCodes[0] | null>(null);
+  const [phoneCountry, setPhoneCountry] = useState<string | null>(null);
+  const [formattedPhone, setFormattedPhone] = useState<string>('');
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [activeFormats, setActiveFormats] = useState({
     bold: false,
@@ -337,44 +316,45 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
   }, [isFullScreen]);
 
   useEffect(() => {
-    if (contactType === 'phone' && formData.contact.startsWith('+')) {
-      const input = formData.contact;
-      const detected = countryCodes.find(c => 
-        input.startsWith(c.code) && 
-        (input.length === c.code.length || input[c.code.length] === ' ' || /\d/.test(input[c.code.length]))
-      );
-      setDetectedCountry(detected || null);
-    } else {
-      setDetectedCountry(null);
-    }
-  }, [formData.contact, contactType]);
-
-  useEffect(() => {
     const value = formData.contact.trim();
     
     if (!value) {
       setContactType(null);
       setIsContactValid(null);
+      setPhoneCountry(null);
+      setFormattedPhone('');
       return;
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const hasOnlyPhoneChars = /^[\d\s\-\(\)\+]+$/.test(value);
-    const hasEnoughDigits = value.replace(/\D/g, '').length >= 7;
-    
-    if (hasOnlyPhoneChars && hasEnoughDigits) {
-      setContactType('phone');
-      const cleanPhone = value.replace(/\D/g, '');
-      setIsContactValid(cleanPhone.length >= 10 && cleanPhone.length <= 15);
-    } else if (value.includes('@')) {
+    if (value.includes('@')) {
       setContactType('email');
       setIsContactValid(emailPattern.test(value));
-    } else if (hasOnlyPhoneChars) {
+      setPhoneCountry(null);
+      setFormattedPhone('');
+      return;
+    }
+
+    try {
+      const phoneValue = value.startsWith('+') ? value : `+${value}`;
+      const phoneNumber = parsePhoneNumberFromString(phoneValue);
+      
+      if (phoneNumber) {
+        setContactType('phone');
+        setIsContactValid(phoneNumber.isValid());
+        setPhoneCountry(phoneNumber.country || null);
+        setFormattedPhone(phoneNumber.formatInternational());
+      } else {
+        setContactType('phone');
+        setIsContactValid(false);
+        setPhoneCountry(null);
+        setFormattedPhone('');
+      }
+    } catch (error) {
       setContactType('phone');
       setIsContactValid(false);
-    } else {
-      setContactType('email');
-      setIsContactValid(false);
+      setPhoneCountry(null);
+      setFormattedPhone('');
     }
   }, [formData.contact]);
 
@@ -460,7 +440,9 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
         body: JSON.stringify({
           ...formData,
           messageHtml,
-          contactType
+          contactType,
+          formattedPhone: contactType === 'phone' ? formattedPhone : undefined,
+          phoneCountry
         })
       });
 
@@ -592,20 +574,31 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               {getContactLabel()}
             </label>
             
-            {detectedCountry && (
-              <span className="absolute right-0 top-2 sm:top-3 flex items-center gap-1 text-sm text-gray-500 animate-fade-in">
-                <span className="text-sm sm:text-base">{detectedCountry.flag}</span>
-                <span className="text-xs hidden sm:inline">{detectedCountry.country}</span>
+            {phoneCountry && isContactValid && (
+              <span className="absolute right-0 top-2 sm:top-3 flex items-center gap-1.5 text-sm text-gray-500 animate-fade-in">
+                <img 
+                  src={`https://flagcdn.com/24x18/${phoneCountry.toLowerCase()}.png`}
+                  alt={`${phoneCountry} flag`}
+                  className="w-5 h-4 object-cover rounded-sm"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <span className="text-xs hidden sm:inline">{phoneCountry}</span>
               </span>
             )}
             
-            {formData.contact && !detectedCountry && (
-              <span className={`absolute right-0 top-2 sm:top-3 transition-all duration-200 ${
-                isContactValid === true ? 'opacity-100' : 'opacity-0'
-              }`}>
+            {formData.contact && !phoneCountry && isContactValid === true && (
+              <span className="absolute right-0 top-2 sm:top-3 transition-all duration-200">
                 <span className="flex items-center justify-center w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-green-500/20 text-green-500">
                   <CheckIcon />
                 </span>
+              </span>
+            )}
+
+            {formattedPhone && isContactValid && focusedField !== 'contact' && (
+              <span className="absolute left-0 -bottom-5 text-xs text-gray-600 animate-fade-in">
+                {formattedPhone}
               </span>
             )}
           </div>
