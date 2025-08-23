@@ -64,7 +64,7 @@ const MinimizeIcon = () => (
       strokeLinecap="round" 
       strokeLinejoin="round" 
       strokeWidth={2} 
-      d="M9 9V5m0 0H5m4 0l-5 5m11-5h4m0 0v4m0-4l-5 5M9 15v4m0 0H5m4 0l-5-5m11 5h4m0 0v-4m0 4l-5-5" 
+      d="M6 18L18 6M6 6l12 12" 
     />
   </svg>
 );
@@ -130,7 +130,7 @@ const FullScreenEditor = ({
   onClose: () => void;
   editorRef: React.RefObject<HTMLDivElement | null>;
   messageHtml: string;
-  onMessageChange: () => void;
+  onMessageChange: (html: string) => void;
   activeFormats: { bold: boolean; italic: boolean; underline: boolean };
   formatText: (command: string) => void;
 }) => {
@@ -139,29 +139,38 @@ const FullScreenEditor = ({
   useEffect(() => {
     if (isOpen && modalEditorRef.current) {
       modalEditorRef.current.innerHTML = messageHtml;
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(modalEditorRef.current);
+      range.collapse(false);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
       modalEditorRef.current.focus();
     }
-  }, [isOpen, messageHtml]);
+  }, [isOpen]);
 
   const handleModalMessageChange = () => {
-    if (modalEditorRef.current && editorRef.current) {
+    if (modalEditorRef.current) {
       const html = modalEditorRef.current.innerHTML;
-      editorRef.current.innerHTML = html;
-      onMessageChange();
+      onMessageChange(html);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-4xl h-[80vh] bg-gray-950 border border-gray-800 rounded-lg flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-backdrop">
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-4xl h-[80vh] bg-gray-950 border border-gray-800 rounded-xl flex flex-col animate-modal-slide shadow-2xl shadow-black/50">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h3 className="text-lg font-medium text-gray-200">Compose Message</h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-300 transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-300 transition-colors rounded-lg hover:bg-gray-800/50"
             title="Close (Esc)"
           >
             <MinimizeIcon />
@@ -207,32 +216,6 @@ const FullScreenEditor = ({
               <path d="M10 4a1 1 0 011 1v5a3 3 0 11-6 0V5a1 1 0 112 0v5a1 1 0 102 0V5a1 1 0 011-1zM5 15a1 1 0 100 2h10a1 1 0 100-2H5z"/>
             </svg>
           </EditorButton>
-          
-          <div className="w-px h-4 bg-gray-700 mx-1" />
-          
-          <EditorButton 
-            onClick={() => {
-              document.execCommand('insertUnorderedList', false);
-              handleModalMessageChange();
-            }} 
-            title="Bullet List"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M7 6a1 1 0 100 2h10a1 1 0 100-2H7zM7 11a1 1 0 100 2h10a1 1 0 100-2H7zM3 7a1 1 0 110-2 1 1 0 010 2zM3 12a1 1 0 110-2 1 1 0 010 2z"/>
-            </svg>
-          </EditorButton>
-
-          <EditorButton 
-            onClick={() => {
-              document.execCommand('insertOrderedList', false);
-              handleModalMessageChange();
-            }} 
-            title="Numbered List"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M7 6a1 1 0 100 2h10a1 1 0 100-2H7zM7 11a1 1 0 100 2h10a1 1 0 100-2H7zM2 7.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zM2 12.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1z"/>
-            </svg>
-          </EditorButton>
         </div>
 
         <div className="flex-1 overflow-hidden px-6 py-4">
@@ -240,7 +223,7 @@ const FullScreenEditor = ({
             ref={modalEditorRef}
             contentEditable
             onInput={handleModalMessageChange}
-            className="w-full h-full overflow-y-auto text-gray-100 focus:outline-none [&>*]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc [&>ol]:ml-4 [&>ol]:list-decimal"
+            className="w-full h-full overflow-y-auto text-gray-100 focus:outline-none selection-bg"
             style={{ 
               wordBreak: 'break-word',
               overflowWrap: 'anywhere'
@@ -257,7 +240,7 @@ const FullScreenEditor = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded transition-colors"
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             Done
           </button>
@@ -431,6 +414,17 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
     setFormData(prev => ({ ...prev, message: text }));
   };
 
+  const handleModalMessageChange = (html: string) => {
+    setMessageHtml(html);
+    if (editorRef.current) {
+      editorRef.current.innerHTML = html;
+    }
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const text = tempDiv.innerText || tempDiv.textContent || '';
+    setFormData(prev => ({ ...prev, message: text }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -532,7 +526,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               onChange={handleChange}
               onFocus={() => setFocusedField('name')}
               onBlur={() => setFocusedField(null)}
-              className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-800 text-gray-100 placeholder-transparent focus:outline-none focus:border-gray-600 transition-colors peer"
+              className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-800 text-gray-100 placeholder-transparent focus:outline-none focus:border-gray-600 transition-colors peer selection-bg"
               placeholder="Name"
               autoComplete="name"
             />
@@ -558,7 +552,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               onChange={handleChange}
               onFocus={() => setFocusedField('contact')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full px-0 py-3 bg-transparent border-0 border-b ${getBorderColor()} text-gray-100 placeholder-transparent focus:outline-none transition-all duration-200 peer`}
+              className={`w-full px-0 py-3 bg-transparent border-0 border-b ${getBorderColor()} text-gray-100 placeholder-transparent focus:outline-none transition-all duration-200 peer selection-bg`}
               placeholder="Email or Phone"
               autoComplete="email tel"
             />
@@ -596,13 +590,13 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               </span>
             )}
 
-            {formData.contact && isContactValid === false && (
+            {/* {formData.contact && isContactValid === false && (
               <span className="absolute left-0 -bottom-5 text-xs text-red-500/70 animate-fade-in">
                 {contactType === 'phone' 
                   ? 'Please enter a valid phone number' 
                   : 'Please enter a valid email address'}
               </span>
-            )}
+            )} */}
           </div>
 
           <div className="relative">
@@ -642,17 +636,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                   </svg>
                 </EditorButton>
                 
-                <div className="w-px h-4 bg-gray-700 mx-1" />
-                
-                <EditorButton 
-                  onClick={() => formatText('insertUnorderedList')} 
-                  title="Bullet List"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M7 6a1 1 0 100 2h10a1 1 0 100-2H7zM7 11a1 1 0 100 2h10a1 1 0 100-2H7zM3 7a1 1 0 110-2 1 1 0 010 2zM3 12a1 1 0 110-2 1 1 0 010 2z"/>
-                  </svg>
-                </EditorButton>
-                
                 <button
                   type="button"
                   onClick={() => setIsFullScreen(true)}
@@ -673,7 +656,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                 onInput={handleMessageChange}
                 onFocus={() => setFocusedField('message')}
                 onBlur={() => setFocusedField(null)}
-                className="w-full h-[120px] overflow-y-auto py-3 bg-transparent text-gray-100 focus:outline-none [&>*]:mb-2 [&>ul]:ml-4 [&>ul]:list-disc scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
+                className="w-full h-[120px] overflow-y-auto py-3 bg-transparent text-gray-100 focus:outline-none scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent selection-bg"
                 style={{ 
                   wordBreak: 'break-word',
                   overflowWrap: 'anywhere'
@@ -772,7 +755,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
         onClose={() => setIsFullScreen(false)}
         editorRef={editorRef}
         messageHtml={messageHtml}
-        onMessageChange={handleMessageChange}
+        onMessageChange={handleModalMessageChange}
         activeFormats={activeFormats}
         formatText={formatText}
       />
@@ -789,8 +772,36 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
           }
         }
         
+        @keyframes modal-backdrop {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes modal-slide {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        
         .animate-fade-in {
           animation: fade-in 0.3s ease-out;
+        }
+        
+        .animate-modal-backdrop {
+          animation: modal-backdrop 0.2s ease-out;
+        }
+        
+        .animate-modal-slide {
+          animation: modal-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         /* Custom scrollbar styles */
@@ -805,6 +816,27 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
         
         .scrollbar-track-transparent::-webkit-scrollbar-track {
           background: transparent;
+        }
+        
+        /* Custom text selection color */
+        .selection-bg::selection {
+          background-color: rgba(147, 51, 234, 0.3);
+          color: #f3f4f6;
+        }
+        
+        .selection-bg::-moz-selection {
+          background-color: rgba(147, 51, 234, 0.3);
+          color: #f3f4f6;
+        }
+        
+        .selection-bg *::selection {
+          background-color: rgba(147, 51, 234, 0.3);
+          color: #f3f4f6;
+        }
+        
+        .selection-bg *::-moz-selection {
+          background-color: rgba(147, 51, 234, 0.3);
+          color: #f3f4f6;
         }
       `}</style>
     </section>
