@@ -326,6 +326,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
       return;
     }
 
+    // Check if it's an email
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (value.includes('@')) {
       setContactType('email');
@@ -335,7 +336,9 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
       return;
     }
 
+    // Try to parse as phone number
     try {
+      // If it doesn't start with +, assume it's a local number
       const phoneValue = value.startsWith('+') ? value : `+${value}`;
       const phoneNumber = parsePhoneNumberFromString(phoneValue);
       
@@ -345,12 +348,14 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
         setPhoneCountry(phoneNumber.country || null);
         setFormattedPhone(phoneNumber.formatInternational());
       } else {
+        // Could be incomplete phone number
         setContactType('phone');
         setIsContactValid(false);
         setPhoneCountry(null);
         setFormattedPhone('');
       }
     } catch (error) {
+      // Not a valid phone format yet
       setContactType('phone');
       setIsContactValid(false);
       setPhoneCountry(null);
@@ -593,12 +598,6 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                 <span className="flex items-center justify-center w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-green-500/20 text-green-500">
                   <CheckIcon />
                 </span>
-              </span>
-            )}
-
-            {formattedPhone && isContactValid && focusedField !== 'contact' && (
-              <span className="absolute left-0 -bottom-5 text-xs text-gray-600 animate-fade-in">
-                {formattedPhone}
               </span>
             )}
           </div>
