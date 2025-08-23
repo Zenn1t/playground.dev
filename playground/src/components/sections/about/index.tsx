@@ -65,54 +65,65 @@ WineParticleSystem.displayName = 'WineParticleSystem';
 const BackgroundEffects = memo(() => (
   <div className="absolute inset-0 pointer-events-none">
     <div 
-      className="absolute inset-0 opacity-20"
+      className="absolute inset-0 opacity-35"
       style={{
-        background: `linear-gradient(45deg, rgba(114, 47, 55, 0.08) 25%, transparent 25%, transparent 50%, rgba(114, 47, 55, 0.08) 50%, rgba(114, 47, 55, 0.08) 75%, transparent 75%, transparent)`,
+        background: `linear-gradient(45deg, rgba(114, 47, 55, 0.12) 25%, transparent 25%, transparent 50%, rgba(114, 47, 55, 0.12) 50%, rgba(114, 47, 55, 0.12) 75%, transparent 75%, transparent)`,
         backgroundSize: '40px 40px',
         transform: 'translateZ(0)',
       }}
     />
     
     <div 
-      className="absolute inset-0 opacity-15"
+      className="absolute inset-0 opacity-25"
       style={{
-        background: `linear-gradient(135deg, rgba(139, 69, 76, 0.05) 25%, transparent 25%, transparent 50%, rgba(139, 69, 76, 0.05) 50%, rgba(139, 69, 76, 0.05) 75%, transparent 75%, transparent)`,
+        background: `linear-gradient(135deg, rgba(139, 69, 76, 0.08) 25%, transparent 25%, transparent 50%, rgba(139, 69, 76, 0.08) 50%, rgba(139, 69, 76, 0.08) 75%, transparent 75%, transparent)`,
         backgroundSize: '60px 60px',
         transform: 'translateZ(0)',
       }}
     />
     
+    <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(114,47,55,0.08)_25%,transparent_25%,transparent_50%,rgba(114,47,55,0.08)_50%,rgba(114,47,55,0.08)_75%,transparent_75%,transparent)] bg-[length:40px_40px] opacity-30" />
+    
+    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(139,69,76,0.05)_25%,transparent_25%,transparent_50%,rgba(139,69,76,0.05)_50%,rgba(139,69,76,0.05)_75%,transparent_75%,transparent)] bg-[length:60px_60px] opacity-20" />
+    
     <div 
-      className="absolute inset-0 opacity-20"
+      className="absolute inset-0 opacity-30"
       style={{
         backgroundImage: `
-          repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(114, 47, 55, 0.03) 2px, rgba(114, 47, 55, 0.03) 4px),
-          repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 76, 0.02) 2px, rgba(139, 69, 76, 0.02) 4px)
+          repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(114, 47, 55, 0.05) 2px, rgba(114, 47, 55, 0.05) 4px),
+          repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 76, 0.04) 2px, rgba(139, 69, 76, 0.04) 4px)
         `,
         transform: 'translateZ(0)',
       }}
     />
+    
+    <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(114,47,55,0.04)_2px,rgba(114,47,55,0.04)_4px)] opacity-50" />
+    <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(139,69,76,0.03)_2px,rgba(139,69,76,0.03)_4px)] opacity-40" />
     
     <div 
       className="absolute inset-0"
       style={{
         background: `
-          radial-gradient(circle at 30% 20%, rgba(114, 47, 55, 0.15) 0%, transparent 40%),
-          radial-gradient(circle at 70% 80%, rgba(139, 69, 76, 0.12) 0%, transparent 45%)
+          radial-gradient(circle at 30% 20%, rgba(114, 47, 55, 0.20) 0%, transparent 40%),
+          radial-gradient(circle at 70% 80%, rgba(139, 69, 76, 0.16) 0%, transparent 45%)
         `,
         transform: 'translateZ(0)',
       }}
     />
     
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(114,47,55,0.2)_0%,rgba(139,69,76,0.1)_30%,transparent_50%)]" />
+    
     <div 
       className="absolute inset-0"
       style={{
-        background: `radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.5) 85%, rgba(0, 0, 0, 0.7) 95%, rgba(0, 0, 0, 0.85) 100%)`,
+        background: `radial-gradient(circle at center, transparent 0%, transparent 25%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.35) 70%, rgba(0, 0, 0, 0.55) 85%, rgba(0, 0, 0, 0.75) 95%, rgba(0, 0, 0, 0.9) 100%)`,
         transform: 'translateZ(0)',
       }}
     />
     
-    <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_40%,rgba(0,0,0,0.05)_50%,rgba(0,0,0,0.15)_65%,rgba(0,0,0,0.35)_80%,rgba(0,0,0,0.6)_90%,rgba(0,0,0,0.8)_100%)]" />
+    
+    <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
   </div>
 ));
 
@@ -347,7 +358,7 @@ export default function AboutSection({ activeIndex }: AboutSectionProps) {
       <div className="w-full max-w-6xl mx-auto relative z-10">
         <div
           ref={containerRef}
-          className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm will-change-transform"
+          className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/60 backdrop-blur-sm will-change-transform"
         >
           <div className="flex-1 space-y-6 mb-8 lg:mb-0">
             <div className="border-b border-gray-900 pb-6 space-y-3">
