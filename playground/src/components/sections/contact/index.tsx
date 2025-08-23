@@ -107,7 +107,7 @@ const EditorButton = ({
     type="button"
     onClick={onClick}
     title={title}
-    className={`p-1.5 rounded transition-colors ${
+    className={`p-1 sm:p-1.5 rounded transition-colors ${
       active 
         ? 'bg-gray-700 text-gray-100' 
         : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
@@ -135,6 +135,16 @@ const FullScreenEditor = ({
   formatText: (command: string) => void;
 }) => {
   const modalEditorRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (isOpen && modalEditorRef.current) {
@@ -159,25 +169,29 @@ const FullScreenEditor = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-backdrop">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 animate-modal-backdrop">
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-md"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-4xl h-[80vh] bg-gray-950 border border-gray-800 rounded-xl flex flex-col animate-modal-slide shadow-2xl shadow-black/50">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h3 className="text-lg font-medium text-gray-200">Compose Message</h3>
+      <div className={`relative w-full ${
+        isMobile 
+          ? 'h-[70vh] rounded-t-xl' 
+          : 'max-w-4xl h-[80vh] sm:h-[70vh] md:h-[80vh] rounded-xl'
+      } bg-gray-950 border border-gray-800 flex flex-col animate-modal-slide shadow-2xl shadow-black/50`}>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-800">
+          <h3 className="text-base sm:text-lg font-medium text-gray-200">Compose Message</h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-300 transition-colors rounded-lg hover:bg-gray-800/50"
+            className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-300 transition-colors rounded-lg hover:bg-gray-800/50"
             title="Close (Esc)"
           >
             <MinimizeIcon />
           </button>
         </div>
 
-        <div className="flex items-center gap-1 px-6 py-3 border-b border-gray-800">
+        <div className="flex items-center gap-0.5 sm:gap-1 px-4 sm:px-6 py-2 sm:py-3 border-b border-gray-800 overflow-x-auto">
           <EditorButton 
             onClick={() => {
               document.execCommand('bold', false);
@@ -186,7 +200,7 @@ const FullScreenEditor = ({
             active={activeFormats.bold}
             title="Bold (Ctrl+B)"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M6 4a1 1 0 00-1 1v10a1 1 0 001 1h4.5a3.5 3.5 0 001.852-6.49A3.5 3.5 0 0010.5 4H6zm4.5 5H7V6h3.5a1.5 1.5 0 010 3zM7 11h3.5a1.5 1.5 0 010 3H7v-3z"/>
             </svg>
           </EditorButton>
@@ -199,7 +213,7 @@ const FullScreenEditor = ({
             active={activeFormats.italic}
             title="Italic (Ctrl+I)"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M8 4a1 1 0 011-1h4a1 1 0 110 2h-1.25l-2 10H11a1 1 0 110 2H7a1 1 0 110-2h1.25l2-10H9a1 1 0 01-1-1z"/>
             </svg>
           </EditorButton>
@@ -212,35 +226,40 @@ const FullScreenEditor = ({
             active={activeFormats.underline}
             title="Underline (Ctrl+U)"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 4a1 1 0 011 1v5a3 3 0 11-6 0V5a1 1 0 112 0v5a1 1 0 102 0V5a1 1 0 011-1zM5 15a1 1 0 100 2h10a1 1 0 100-2H5z"/>
             </svg>
           </EditorButton>
         </div>
 
-        <div className="flex-1 overflow-hidden px-6 py-4">
+        <div className="flex-1 overflow-hidden px-4 sm:px-6 py-3 sm:py-4">
           <div
             ref={modalEditorRef}
             contentEditable
             onInput={handleModalMessageChange}
-            className="w-full h-full overflow-y-auto text-gray-100 focus:outline-none selection-bg"
+            className="w-full h-full overflow-y-auto text-sm sm:text-base text-gray-100 focus:outline-none selection-bg"
             style={{ 
               wordBreak: 'break-word',
-              overflowWrap: 'anywhere'
+              overflowWrap: 'anywhere',
+              WebkitUserSelect: 'text',
+              userSelect: 'text'
             }}
             data-scroll-ignore="true"
             suppressContentEditableWarning
           />
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800">
-          <span className="text-xs text-gray-600">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-800">
+          <span className="text-xs text-gray-600 hidden sm:block">
             Press Esc to close • Changes are saved automatically
+          </span>
+          <span className="text-xs text-gray-600 sm:hidden">
+            Changes saved
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
           >
             Done
           </button>
@@ -501,21 +520,21 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
   return (
     <section
       id="contact"
-      className={`min-h-screen w-screen relative px-4 md:px-8 py-16 md:py-24 flex items-center justify-center transition-all duration-700 ${
+      className={`min-h-screen w-screen relative px-4 md:px-8 py-12 sm:py-16 md:py-24 flex items-center justify-center transition-all duration-700 ${
         activeIndex >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
       }`}
     >
       <div className="max-w-xl w-full mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-gray-100">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3 text-gray-100">
             Get In Touch
           </h2>
-          <p className="text-gray-500 text-base">
+          <p className="text-gray-500 text-sm sm:text-base">
             Let's build something amazing together
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           <div className="relative">
             <input
               type="text"
@@ -526,7 +545,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               onChange={handleChange}
               onFocus={() => setFocusedField('name')}
               onBlur={() => setFocusedField(null)}
-              className="w-full px-0 py-3 bg-transparent border-0 border-b border-gray-800 text-gray-100 placeholder-transparent focus:outline-none focus:border-gray-600 transition-colors peer selection-bg"
+              className="w-full px-0 py-2 sm:py-3 bg-transparent border-0 border-b border-gray-800 text-gray-100 placeholder-transparent focus:outline-none focus:border-gray-600 transition-colors peer selection-bg text-sm sm:text-base"
               placeholder="Name"
               autoComplete="name"
             />
@@ -535,7 +554,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               className={`absolute left-0 transition-all duration-200 ${
                 formData.name || focusedField === 'name'
                   ? '-top-5 text-xs text-gray-600'
-                  : 'top-3 text-base text-gray-500'
+                  : 'top-2 sm:top-3 text-sm sm:text-base text-gray-500'
               } pointer-events-none`}
             >
               Your Name
@@ -552,7 +571,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               onChange={handleChange}
               onFocus={() => setFocusedField('contact')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full px-0 py-3 bg-transparent border-0 border-b ${getBorderColor()} text-gray-100 placeholder-transparent focus:outline-none transition-all duration-200 peer selection-bg`}
+              className={`w-full px-0 py-2 sm:py-3 bg-transparent border-0 border-b ${getBorderColor()} text-gray-100 placeholder-transparent focus:outline-none transition-all duration-200 peer selection-bg text-sm sm:text-base`}
               placeholder="Email or Phone"
               autoComplete="email tel"
             />
@@ -561,7 +580,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               className={`absolute left-0 transition-all duration-200 ${
                 formData.contact || focusedField === 'contact'
                   ? '-top-5 text-xs'
-                  : 'top-3 text-base'
+                  : 'top-2 sm:top-3 text-sm sm:text-base'
               } ${
                 formData.contact && isContactValid === false
                   ? 'text-red-500/70'
@@ -574,36 +593,28 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
             </label>
             
             {detectedCountry && (
-              <span className="absolute right-0 top-3 flex items-center gap-1 text-sm text-gray-500 animate-fade-in">
-                <span className="text-base">{detectedCountry.flag}</span>
-                <span className="text-xs">{detectedCountry.country}</span>
+              <span className="absolute right-0 top-2 sm:top-3 flex items-center gap-1 text-sm text-gray-500 animate-fade-in">
+                <span className="text-sm sm:text-base">{detectedCountry.flag}</span>
+                <span className="text-xs hidden sm:inline">{detectedCountry.country}</span>
               </span>
             )}
             
             {formData.contact && !detectedCountry && (
-              <span className={`absolute right-0 top-3 transition-all duration-200 ${
+              <span className={`absolute right-0 top-2 sm:top-3 transition-all duration-200 ${
                 isContactValid === true ? 'opacity-100' : 'opacity-0'
               }`}>
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-500/20 text-green-500">
+                <span className="flex items-center justify-center w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-green-500/20 text-green-500">
                   <CheckIcon />
                 </span>
               </span>
             )}
-
-            {/* {formData.contact && isContactValid === false && (
-              <span className="absolute left-0 -bottom-5 text-xs text-red-500/70 animate-fade-in">
-                {contactType === 'phone' 
-                  ? 'Please enter a valid phone number' 
-                  : 'Please enter a valid email address'}
-              </span>
-            )} */}
           </div>
 
           <div className="relative">
             <div className={`transition-all duration-200 ${
               focusedField === 'message' ? 'border-gray-600' : 'border-gray-800'
             } border-b`}>
-              <div className={`flex items-center gap-1 pb-2 transition-opacity duration-200 ${
+              <div className={`flex items-center gap-0.5 sm:gap-1 pb-1 sm:pb-2 transition-opacity duration-200 ${
                 focusedField === 'message' || formData.message ? 'opacity-100' : 'opacity-0'
               }`}>
                 <EditorButton 
@@ -611,7 +622,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                   active={activeFormats.bold}
                   title="Bold (Ctrl+B)"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M6 4a1 1 0 00-1 1v10a1 1 0 001 1h4.5a3.5 3.5 0 001.852-6.49A3.5 3.5 0 0010.5 4H6zm4.5 5H7V6h3.5a1.5 1.5 0 010 3zM7 11h3.5a1.5 1.5 0 010 3H7v-3z"/>
                   </svg>
                 </EditorButton>
@@ -621,7 +632,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                   active={activeFormats.italic}
                   title="Italic (Ctrl+I)"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8 4a1 1 0 011-1h4a1 1 0 110 2h-1.25l-2 10H11a1 1 0 110 2H7a1 1 0 110-2h1.25l2-10H9a1 1 0 01-1-1z"/>
                   </svg>
                 </EditorButton>
@@ -631,7 +642,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                   active={activeFormats.underline}
                   title="Underline (Ctrl+U)"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 4a1 1 0 011 1v5a3 3 0 11-6 0V5a1 1 0 112 0v5a1 1 0 102 0V5a1 1 0 011-1zM5 15a1 1 0 100 2h10a1 1 0 100-2H5z"/>
                   </svg>
                 </EditorButton>
@@ -639,13 +650,13 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                 <button
                   type="button"
                   onClick={() => setIsFullScreen(true)}
-                  className="ml-auto p-1.5 text-gray-500 hover:text-gray-300 hover:bg-gray-800 rounded transition-colors"
+                  className="ml-auto p-1 sm:p-1.5 text-gray-500 hover:text-gray-300 hover:bg-gray-800 rounded transition-colors"
                   title="Expand editor"
                 >
                   <ExpandIcon />
                 </button>
                 
-                <span className="text-xs text-gray-600 ml-2">
+                <span className="text-xs text-gray-600 ml-1 sm:ml-2 hidden sm:inline">
                   {formData.message.length > 0 && `${formData.message.length} chars`}
                 </span>
               </div>
@@ -656,7 +667,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
                 onInput={handleMessageChange}
                 onFocus={() => setFocusedField('message')}
                 onBlur={() => setFocusedField(null)}
-                className="w-full h-[120px] overflow-y-auto py-3 bg-transparent text-gray-100 focus:outline-none scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent selection-bg"
+                className="w-full h-[100px] sm:h-[120px] overflow-y-auto py-2 sm:py-3 bg-transparent text-gray-100 focus:outline-none scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent selection-bg text-sm sm:text-base"
                 style={{ 
                   wordBreak: 'break-word',
                   overflowWrap: 'anywhere'
@@ -670,7 +681,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               className={`absolute left-0 transition-all duration-200 pointer-events-none ${
                 formData.message || focusedField === 'message'
                   ? '-top-5 text-xs text-gray-600'
-                  : 'top-3 text-base text-gray-500'
+                  : 'top-2 sm:top-3 text-sm sm:text-base text-gray-500'
               }`}
             >
               Your Message
@@ -683,11 +694,11 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
             )}
           </div>
 
-          <div className="pt-8">
+          <div className="pt-6 sm:pt-8">
             <button
               type="submit"
               disabled={isSubmitting || (formData.contact && !isContactValid) || !formData.message}
-              className={`group relative w-full h-12 border border-gray-800 text-gray-300 font-medium overflow-hidden transition-all duration-300 ${
+              className={`group relative w-full h-10 sm:h-12 border border-gray-800 text-gray-300 font-medium overflow-hidden transition-all duration-300 text-sm sm:text-base ${
                 isSubmitting || (formData.contact && !isContactValid) || !formData.message
                   ? 'opacity-50 cursor-not-allowed' 
                   : 'hover:border-gray-600 hover:text-gray-100'
@@ -698,7 +709,7 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
               <span className="relative flex items-center justify-center gap-2">
                 {isSubmitting ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></span>
+                    <span className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></span>
                     <span>Sending</span>
                   </>
                 ) : (
@@ -711,38 +722,38 @@ export default function ContactSection({ activeIndex }: ContactSectionProps) {
             </button>
 
             {submitStatus === 'success' && (
-              <div className="mt-4 text-center text-gray-400 text-sm animate-fade-in">
+              <div className="mt-3 sm:mt-4 text-center text-gray-400 text-xs sm:text-sm animate-fade-in">
                 Message sent. I'll respond within 24 hours.
               </div>
             )}
 
             {submitStatus === 'error' && (
-              <div className="mt-4 text-center text-red-500/80 text-sm animate-fade-in">
+              <div className="mt-3 sm:mt-4 text-center text-red-500/80 text-xs sm:text-sm animate-fade-in">
                 Failed to send. Please try again.
               </div>
             )}
           </div>
         </form>
 
-        <div className="mt-16 pt-8 border-t border-gray-900">
-          <div className="flex justify-center items-center gap-8">
+        <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-900">
+          <div className="flex justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm">
             <a 
               href="https://github.com/Zenn1t" 
-              className="text-gray-600 hover:text-gray-400 transition-colors text-sm"
+              className="text-gray-600 hover:text-gray-400 transition-colors"
             >
               GitHub
             </a>
             <span className="text-gray-800">•</span>
             <a 
               href="https://t.me/yourchannel" 
-              className="text-gray-600 hover:text-gray-400 transition-colors text-sm"
+              className="text-gray-600 hover:text-gray-400 transition-colors"
             >
               Telegram
             </a>
             <span className="text-gray-800">•</span>
             <a 
               href="mailto:mnx.private.dev@gmail.com" 
-              className="text-gray-600 hover:text-gray-400 transition-colors text-sm"
+              className="text-gray-600 hover:text-gray-400 transition-colors"
             >
               Email
             </a>
