@@ -1,2 +1,5 @@
 tree.py
 docs.txt
+.env
+.env.local
+.env.production
