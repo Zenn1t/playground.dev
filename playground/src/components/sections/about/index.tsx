@@ -1,34 +1,27 @@
 'use client';
 
-import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import React, { useLayoutEffect, useRef, useState, useEffect, memo } from 'react';
 import CodeTerminal from './CodeTerminal';
 import { TERMINAL_FILES } from './constants';
 
-// Particle System с винными оттенками
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  speedX: number;
-  speedY: number;
-  opacity: number;
-  duration: number;
-}
-
-const WineParticleSystem = () => {
-  const [particles, setParticles] = useState<Particle[]>([]);
+const WineParticleSystem = memo(() => {
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    opacity: number;
+    duration: number;
+  }>>([]);
 
   useEffect(() => {
-    const particleArray: Particle[] = Array.from({ length: 40 }, (_, i) => ({
+    const particleArray = Array.from({ length: 20 }, (_, i) => ({ 
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       size: Math.random() * 3 + 1,
-      speedX: (Math.random() - 0.5) * 2,
-      speedY: (Math.random() - 0.5) * 2,
-      opacity: Math.random() * 0.5 + 0.1,
-      duration: 15 + Math.random() * 10,
+      opacity: Math.random() * 0.3 + 0.1, 
+      duration: 20 + Math.random() * 10, 
     }));
     setParticles(particleArray);
   }, []);
@@ -38,7 +31,7 @@ const WineParticleSystem = () => {
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="absolute rounded-full"
+          className="absolute rounded-full will-change-transform"
           style={{
             background: 'linear-gradient(to right, rgb(114, 47, 55), rgb(139, 69, 76))',
             left: `${particle.x}%`,
@@ -46,42 +39,84 @@ const WineParticleSystem = () => {
             width: `${particle.size}px`,
             height: `${particle.size}px`,
             opacity: particle.opacity,
-            transform: 'translate(-50%, -50%)',
-            animation: `particleFloat${particle.id % 3} ${particle.duration}s infinite linear`,
+            transform: 'translate(-50%, -50%) translateZ(0)',
+            animation: `particleFloat ${particle.duration}s infinite linear`,
           }}
         />
       ))}
       
       <style dangerouslySetInnerHTML={{
         __html: `
-          @keyframes particleFloat0 {
-            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
-            25% { transform: translate(-50%, -50%) translateX(50px) translateY(-30px); }
-            50% { transform: translate(-50%, -50%) translateX(-30px) translateY(40px); }
-            75% { transform: translate(-50%, -50%) translateX(40px) translateY(-20px); }
-            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
-          }
-          
-          @keyframes particleFloat1 {
-            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
-            25% { transform: translate(-50%, -50%) translateX(-40px) translateY(50px); }
-            50% { transform: translate(-50%, -50%) translateX(60px) translateY(-25px); }
-            75% { transform: translate(-50%, -50%) translateX(-20px) translateY(-45px); }
-            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
-          }
-          
-          @keyframes particleFloat2 {
-            0% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
-            25% { transform: translate(-50%, -50%) translateX(35px) translateY(40px); }
-            50% { transform: translate(-50%, -50%) translateX(-50px) translateY(-35px); }
-            75% { transform: translate(-50%, -50%) translateX(25px) translateY(30px); }
-            100% { transform: translate(-50%, -50%) translateX(0px) translateY(0px); }
+          @keyframes particleFloat {
+            0% { transform: translate(-50%, -50%) translateZ(0) translateX(0px) translateY(0px); }
+            25% { transform: translate(-50%, -50%) translateZ(0) translateX(30px) translateY(-20px); }
+            50% { transform: translate(-50%, -50%) translateZ(0) translateX(-20px) translateY(30px); }
+            75% { transform: translate(-50%, -50%) translateZ(0) translateX(20px) translateY(-10px); }
+            100% { transform: translate(-50%, -50%) translateZ(0) translateX(0px) translateY(0px); }
           }
         `
       }} />
     </div>
   );
-};
+});
+
+WineParticleSystem.displayName = 'WineParticleSystem';
+
+const BackgroundEffects = memo(() => (
+  <div className="absolute inset-0 pointer-events-none">
+    <div 
+      className="absolute inset-0 opacity-20"
+      style={{
+        background: `linear-gradient(45deg, rgba(114, 47, 55, 0.08) 25%, transparent 25%, transparent 50%, rgba(114, 47, 55, 0.08) 50%, rgba(114, 47, 55, 0.08) 75%, transparent 75%, transparent)`,
+        backgroundSize: '40px 40px',
+        transform: 'translateZ(0)',
+      }}
+    />
+    
+    <div 
+      className="absolute inset-0 opacity-15"
+      style={{
+        background: `linear-gradient(135deg, rgba(139, 69, 76, 0.05) 25%, transparent 25%, transparent 50%, rgba(139, 69, 76, 0.05) 50%, rgba(139, 69, 76, 0.05) 75%, transparent 75%, transparent)`,
+        backgroundSize: '60px 60px',
+        transform: 'translateZ(0)',
+      }}
+    />
+    
+    <div 
+      className="absolute inset-0 opacity-20"
+      style={{
+        backgroundImage: `
+          repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(114, 47, 55, 0.03) 2px, rgba(114, 47, 55, 0.03) 4px),
+          repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 76, 0.02) 2px, rgba(139, 69, 76, 0.02) 4px)
+        `,
+        transform: 'translateZ(0)',
+      }}
+    />
+    
+    <div 
+      className="absolute inset-0"
+      style={{
+        background: `
+          radial-gradient(circle at 30% 20%, rgba(114, 47, 55, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 70% 80%, rgba(139, 69, 76, 0.12) 0%, transparent 45%)
+        `,
+        transform: 'translateZ(0)',
+      }}
+    />
+    
+    <div 
+      className="absolute inset-0"
+      style={{
+        background: `radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.5) 85%, rgba(0, 0, 0, 0.7) 95%, rgba(0, 0, 0, 0.85) 100%)`,
+        transform: 'translateZ(0)',
+      }}
+    />
+    
+    <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent" />
+  </div>
+));
+
+BackgroundEffects.displayName = 'BackgroundEffects';
 
 type IconProps = { className?: string };
 
@@ -97,7 +132,6 @@ const GithubIcon = ({ className }: IconProps) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    shapeRendering="geometricPrecision"
   >
     <path d="M9 19c-5 1.5-5-2.5-7-3" />
     <path d="M15 22v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1C19.91 1 18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77 5.44 5.44 0 0 0 3.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
@@ -116,7 +150,6 @@ const TelegramIcon = ({ className }: IconProps) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    shapeRendering="geometricPrecision"
   >
     <path d="M21.3 4.1L3.2 10.5c-.6.2-.6 1 .02 1.2l6.2 2.1c.3.1.5.3.6.6l2.1 6.2c.2.62 1 .62 1.2.02L21.7 4.6c.2-.56-.28-1.06-.92-.5Z" />
     <path d="M9.8 13.3L21.3 4.1" />
@@ -135,7 +168,6 @@ const MailIcon = ({ className }: IconProps) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    shapeRendering="geometricPrecision"
   >
     <rect x="2.2" y="4.5" width="19.6" height="15" rx="2" />
     <path d="M21.5 7.2L12 12.3 2.5 7.2" />
@@ -154,7 +186,6 @@ const OutlookIcon = ({ className }: IconProps) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    shapeRendering="geometricPrecision"
   >
     <rect x="2.2" y="4.5" width="19.6" height="15" rx="2" />
     <path d="M21.5 7.2L12 12.3" />
@@ -163,7 +194,7 @@ const OutlookIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-const IconButton = ({
+const IconButton = memo(({
   href,
   label,
   hoverColor,
@@ -179,7 +210,7 @@ const IconButton = ({
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className={`inline-flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 border border-gray-800 rounded-sm text-gray-600 hover:border-gray-700 transition-all duration-200 ${
+    className={`inline-flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 border border-gray-800 rounded-sm text-gray-600 hover:border-gray-700 transition-colors duration-200 ${
       hoverColor || 'hover:text-white'
     } focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-700`}
   >
@@ -187,7 +218,9 @@ const IconButton = ({
       {children}
     </span>
   </a>
-);
+));
+
+IconButton.displayName = 'IconButton';
 
 function BracketHeader({
   width,
@@ -260,126 +293,65 @@ export default function AboutSection({ activeIndex }: AboutSectionProps) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const [devWidth, setDevWidth] = useState(0);
-  const [rowWidth, setRowWidth] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const [dimensions, setDimensions] = useState({
+    dev: 0,
+    row: 0,
+    container: 0,
+  });
   const [isReady, setIsReady] = useState(false);
   const [useStackedLayout, setUseStackedLayout] = useState(false);
 
   useLayoutEffect(() => {
-    const roDev = new ResizeObserver((entries) => {
+    const observer = new ResizeObserver((entries) => {
+      const newDimensions = { ...dimensions };
+      
       for (const entry of entries) {
         const width = Math.ceil(entry.contentRect.width);
-        setDevWidth(width);
+        if (entry.target === devRef.current) newDimensions.dev = width;
+        else if (entry.target === rowRef.current) newDimensions.row = width;
+        else if (entry.target === containerRef.current) newDimensions.container = width;
       }
+      
+      setDimensions(newDimensions);
     });
 
-    const roRow = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const width = Math.ceil(entry.contentRect.width);
-        setRowWidth(width);
-      }
-    });
-
-    const roContainer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const width = Math.ceil(entry.contentRect.width);
-        setContainerWidth(width);
-      }
-    });
-
-    if (devRef.current) roDev.observe(devRef.current);
-    if (rowRef.current) roRow.observe(rowRef.current);
-    if (containerRef.current) roContainer.observe(containerRef.current);
+    if (devRef.current) observer.observe(devRef.current);
+    if (rowRef.current) observer.observe(rowRef.current);
+    if (containerRef.current) observer.observe(containerRef.current);
 
     const timer = setTimeout(() => setIsReady(true), 100);
 
     return () => {
-      roDev.disconnect();
-      roRow.disconnect();
-      roContainer.disconnect();
+      observer.disconnect();
       clearTimeout(timer);
     };
-  }, []);
+  }, []); 
 
   useLayoutEffect(() => {
-    if (rowWidth && containerWidth) {
-      const shouldStack = rowWidth > containerWidth - 32;
+    if (dimensions.row && dimensions.container) {
+      const shouldStack = dimensions.row > dimensions.container - 32;
       setUseStackedLayout(shouldStack);
     }
-  }, [rowWidth, containerWidth]);
+  }, [dimensions]);
 
   return (
     <section
       id="about"
-      className={`h-screen w-screen relative flex items-center justify-center px-4 md:px-8 transition-all duration-700 ${
+      className={`h-screen w-screen relative flex items-center justify-center px-4 md:px-8 transition-opacity transition-transform duration-700 transform-gpu ${
         activeIndex >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
       }`}
     >
-      <div className="absolute inset-0 pointer-events-none">
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: `linear-gradient(45deg, rgba(114, 47, 55, 0.08) 25%, transparent 25%, transparent 50%, rgba(114, 47, 55, 0.08) 50%, rgba(114, 47, 55, 0.08) 75%, transparent 75%, transparent)`,
-            backgroundSize: '40px 40px'
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0 opacity-15"
-          style={{
-            background: `linear-gradient(135deg, rgba(139, 69, 76, 0.05) 25%, transparent 25%, transparent 50%, rgba(139, 69, 76, 0.05) 50%, rgba(139, 69, 76, 0.05) 75%, transparent 75%, transparent)`,
-            backgroundSize: '60px 60px'
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: `repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(114, 47, 55, 0.03) 2px, rgba(114, 47, 55, 0.03) 4px)`
-          }}
-        />
-        <div 
-          className="absolute inset-0 opacity-25"
-          style={{
-            background: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 76, 0.02) 2px, rgba(139, 69, 76, 0.02) 4px)`
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle at 30% 20%, rgba(114, 47, 55, 0.15) 0%, transparent 40%)`
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle at 70% 80%, rgba(139, 69, 76, 0.12) 0%, transparent 45%)`
-          }}
-        />
-        
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.5) 85%, rgba(0, 0, 0, 0.7) 95%, rgba(0, 0, 0, 0.85) 100%)`
-          }}
-        />
-        
-        <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-black via-transparent to-transparent"></div>
-      </div>
-
+      <BackgroundEffects />
       <WineParticleSystem />
       
       <div className="w-full max-w-6xl mx-auto relative z-10">
         <div
           ref={containerRef}
-          className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm"
+          className="border border-gray-900 rounded-sm p-4 md:p-8 flex flex-col lg:flex-row bg-black/50 backdrop-blur-sm will-change-transform"
         >
           <div className="flex-1 space-y-6 mb-8 lg:mb-0">
             <div className="border-b border-gray-900 pb-6 space-y-3">
-              <BracketHeader width={useStackedLayout ? 0 : rowWidth} isReady={isReady}>
+              <BracketHeader width={useStackedLayout ? 0 : dimensions.row} isReady={isReady}>
                 Mark Reshetov
               </BracketHeader>
 
@@ -409,7 +381,7 @@ export default function AboutSection({ activeIndex }: AboutSectionProps) {
                       Backend Developer
                     </p>
 
-                    <div className="ml-2" style={devWidth ? { width: `${devWidth}px` } : undefined}>
+                    <div className="ml-2" style={dimensions.dev ? { width: `${dimensions.dev}px` } : undefined}>
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         {socialLinks.map((link, i) => (
                           <IconButton key={i} href={link.href} label={link.label} hoverColor={link.hoverColor}>
